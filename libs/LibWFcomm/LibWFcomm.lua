@@ -10,9 +10,7 @@ C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 pGUID = UnitGUID("player")
 pClass = select(2, UnitClass("player"))
 
-local lastMsg
-local lastTime = GetTime()
-local lastExpiration = nil
+local lastExpiration
 local hasRefreshed = false
 
 -- new message format C_ChatInfo.SendAddonMessage("WF_STATUS", "<guid>:<id>:<expire>:<lagHome>:additional:stuff", "PARTY")
@@ -21,7 +19,6 @@ function windfuryDurationCheck()
 	local _,_,lagHome,_ = GetNetStats()
 	local mh,expiration,_,enchid,_,_,_,_ = GetWeaponEnchantInfo("player")
 	local combat = InCombatLockdown() and "1" or "0"
-	print('LibWFcomm', mh, expiration)
 
 	if mh then
 		msg = format("%s:%d:%d:%d:%s", pGUID, enchid, expiration, lagHome, combat) -- message: wf active + duration
@@ -32,12 +29,15 @@ function windfuryDurationCheck()
 		msg = format("%s:nil:nil:%s:%s", pGUID, lagHome, combat) -- message: wf expired
 	end
 	lastExpiration = expiration
+	--print('LibWFcomm', mh, expiration, lastStatus, hasRefreshed)
 
-	if CTL and msg and msg ~= lastMsg and (lastStatus ~= mh or hasRefreshed) then
+	if CTL and msg and (lastStatus ~= mh or hasRefreshed) then
 		CTL:SendAddonMessage("BULK", COMM_PREFIX, msg, 'PARTY')
-		CTL:SendAddonMessage("BULK", COMM_PREFIX_RAID, msg, 'RAID')
-		lastMsg = msg
-		lastTime = GetTime()
+		if lastStatus ~= mh then
+			-- not sending refresh msgs to raid to reduce spam
+			CTL:SendAddonMessage("BULK", COMM_PREFIX_RAID, msg, 'RAID')
+		end
+		--print("LibWFcomm - ", msg)
 		lastStatus = mh
 	end
 	msg = nil

@@ -189,7 +189,7 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 			wfc.buttons[j].icon:SetAlpha(1)
 		end
 	elseif prefix == COMM_PREFIX then --new API
-		print(prefix, message, channel, sender)
+		--print(prefix, message, channel, sender)
 		local gGUID, spellID, expiration, lag, combat = strsplit(":", message)
 		if not wfc.ixs[gGUID] then
 			return
