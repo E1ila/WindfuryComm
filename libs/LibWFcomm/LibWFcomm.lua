@@ -4,56 +4,83 @@ local major, minor = "LibWFcomm", 3
 local LibWFcomm = LibStub:NewLibrary(major, minor)
 local CTL = _G.ChatThrottleLib
 local COMM_PREFIX = "WF_STATUS"
-local COMM_PREFIX_RAID = "WF_RAID_STATUS"
+local COMM_PREFIX_CREDIT = "WF_CREDIT"
+local WF_ENCHANT_SPELL_ID = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
+C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_CREDIT)
 
 pGUID = UnitGUID("player")
 pClass = select(2, UnitClass("player"))
 
 local lastExpiration
 local hasRefreshed = false
+local myShaman
+local combatStart
+local combatWfStart
+local combatUptime
 
 -- new message format C_ChatInfo.SendAddonMessage("WF_STATUS", "<guid>:<id>:<expire>:<lagHome>:additional:stuff", "PARTY")
 function windfuryDurationCheck()
-	msg = nil
+	local msg
 	local _,_,lagHome,_ = GetNetStats()
 	local mh,expiration,_,enchid,_,_,_,_ = GetWeaponEnchantInfo("player")
 	local combat = InCombatLockdown() and "1" or "0"
 	local isdead = UnitIsDeadOrGhost("player") and "1" or "0"
 
+	--print("combatStart", combatStart, "combatWfStart", combatWfStart, "combatUptime", combatUptime)
+	if not combatStart and combat == "1" then
+		--print("Combat started")
+		combatStart = GetTime()
+		combatUptime = 0
+	elseif combatStart and combat == "0" then
+		if combatWfStart then
+			combatUptime = combatUptime + (GetTime() - combatWfStart)
+		end
+		local creditmsg = format("%d:%s", math.floor(combatUptime + 0.5), myShaman)
+		--print("Combat ended, uptime", combatUptime, " credit to", myShaman, ' ', creditmsg)
+		CTL:SendAddonMessage("NORMAL", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+		combatStart = nil
+		combatWfStart = nil
+	end
+
 	if mh then
 		msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor) -- message: wf active + duration
+		local spellName = WF_ENCHANT_SPELL_ID[enchid]
+		if spellName then
+			if combatStart and not combatWfStart then
+				--print("taking WfStart time")
+				combatWfStart = GetTime()
+			end
+		end
 		if lastExpiration == nil or expiration > lastExpiration then
 			hasRefreshed = true
 		end
 	else
 		msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor) -- message: wf expired
+		if combatStart and combatWfStart then
+			combatUptime = combatUptime + (GetTime() - combatWfStart)
+			--print("WF dropped, so far uptime", combatUptime, " credit to", myShaman)
+			combatWfStart = nil
+		end
 	end
 	lastExpiration = expiration
-	--print('LibWFcomm', mh, expiration, lastStatus, hasRefreshed)
 
 	if CTL and msg and (lastStatus ~= mh or hasRefreshed) then
 		CTL:SendAddonMessage("BULK", COMM_PREFIX, msg, 'PARTY')
-		if lastStatus ~= mh then
-			-- not sending refresh msgs to raid to reduce spam
-			CTL:SendAddonMessage("BULK", COMM_PREFIX_RAID, msg, 'RAID')
-		end
-		--print("LibWFcomm - ", msg)
 		lastStatus = mh
 	end
-	msg = nil
 end
 
 function checkForShaman()
-	local shamanPresent = nil
+	myShaman = nil
 	for index=1,4 do
 		local pstring = "party"..index
 		local gclass = select(2, UnitClass(pstring))
 		if (gclass == "SHAMAN") then
-			shamanPresent = true
+			myShaman = UnitName(pstring)
 		end
 	end
-	return shamanPresent
+	return myShaman
 end
 		
 

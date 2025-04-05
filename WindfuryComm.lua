@@ -10,10 +10,8 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 local pClass = select(2, UnitClass("player"))
 local wfcLib = LibStub("LibWFcomm")
 local COMM_PREFIX = "WF_STATUS"
-local COMM_PREFIX_RAID = "WF_RAID_STATUS"
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
-C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_RAID)
 
 local classIcon = {
 	["WARRIOR"] = "Interface\\Icons\\inv_sword_27",
