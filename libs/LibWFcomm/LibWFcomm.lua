@@ -27,28 +27,33 @@ function windfuryDurationCheck()
 	local combat = InCombatLockdown() and "1" or "0"
 	local isdead = UnitIsDeadOrGhost("player") and "1" or "0"
 
-	--print("combatStart", combatStart, "combatWfStart", combatWfStart, "combatUptime", combatUptime)
 	if not combatStart and combat == "1" then
-		--print("Combat started")
+		-- combat started
 		combatStart = GetTime()
 		combatUptime = 0
 	elseif combatStart and combat == "0" then
+		-- combat ended
 		if combatWfStart then
+			-- combat ended with wf, sum uptime
 			combatUptime = combatUptime + (GetTime() - combatWfStart)
 		end
-		local creditmsg = format("%d:%s", math.floor(combatUptime + 0.5), myShaman)
-		--print("Combat ended, uptime", combatUptime, " credit to", myShaman, ' ', creditmsg)
-		CTL:SendAddonMessage("NORMAL", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+		if myShaman then
+			-- report uptime
+			local combatTime = GetTime() - combatStart
+			local creditmsg = format("%d:%d:%s", math.floor(combatTime + 0.5), math.floor(combatUptime + 0.5), myShaman)
+			CTL:SendAddonMessage("NORMAL", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+		end
 		combatStart = nil
 		combatWfStart = nil
 	end
 
 	if mh then
-		msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor) -- message: wf active + duration
+		-- report wf expiration time
+		msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor)
 		local spellName = WF_ENCHANT_SPELL_ID[enchid]
 		if spellName then
 			if combatStart and not combatWfStart then
-				--print("taking WfStart time")
+				-- combat started with wf, take time
 				combatWfStart = GetTime()
 			end
 		end
@@ -56,10 +61,11 @@ function windfuryDurationCheck()
 			hasRefreshed = true
 		end
 	else
-		msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor) -- message: wf expired
+		-- report expired wf
+		msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor)
 		if combatStart and combatWfStart then
 			combatUptime = combatUptime + (GetTime() - combatWfStart)
-			--print("WF dropped, so far uptime", combatUptime, " credit to", myShaman)
+			-- wf dropped in combat, sum uptime
 			combatWfStart = nil
 		end
 	end
