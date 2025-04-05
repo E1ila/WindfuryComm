@@ -92,6 +92,7 @@ end
 local function collectGroupInfo()
 	wfcBgFrame:Show() -- group joined, show frame
 	wipe(wfc.ixs)
+	wipe(wfc.version)
 	local j = -1
 	for index = 1, 4 do
 		local pstring = "party" .. index
@@ -148,7 +149,7 @@ local function setBlockerButton(gGUID, remain, spellID)
 	end
 end
 
-function wfc:ShowWarning(playerIndex, combat)
+local function showWarning(playerIndex, combat)
 	wfc.buttons[playerIndex].icon:SetAlpha(1)
 	wfc.buttons[playerIndex].icon:SetDesaturated(1)
 	wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
@@ -203,13 +204,17 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		end
 		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration) / 1000, tonumber(lagHome)
 		local spellName = spellTable[spellID]
+
 		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', spellName or spellID, 't'..expiration, 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
+
+		wfc.version[sender] = version or "-"
+
 		if spellName then -- update buffs
 			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
 			startTimerButton(gGUID, remain, wfc.icons[gGUID])
 		else -- addon installed or buff expired
-			self:ShowWarning(playerIndex, combat)
+			showWarning(playerIndex, combat)
 		end
 	end
 end
@@ -226,7 +231,6 @@ function wfc:ADDON_LOADED()
 		yspace = 0,
 		xspace = 1,
 	}
-	--if not wfcdb.debug then wfcdb.debug = false end
 	initFrames() -- initiate frames early
 	modLayout()
 end
@@ -257,6 +261,13 @@ local function wfSlashCommands(entry)
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
+	elseif arg1 == "ver" then
+		for k, v in pairs(wfc.version) do
+			local name = GetUnitName(k)
+			if name then
+				out(name .. ": " .. v)
+			end
+		end
 	elseif arg1 == "show" then
 		wfcBgFrame:Show()
 		for i = 0, 3 do
