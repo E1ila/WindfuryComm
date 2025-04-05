@@ -212,7 +212,7 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
 		local spellName = spellTable[spellID]
 
-		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
+		debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
 
 		wfc.version[sender] = version or "-"
 
