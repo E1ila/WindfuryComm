@@ -202,14 +202,14 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		if not playerIndex then
 			return
 		end
-		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration) / 1000, tonumber(lagHome)
+		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
 		local spellName = spellTable[spellID]
 
-		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', spellName or spellID, 't'..expiration, 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
+		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
 
 		wfc.version[sender] = version or "-"
 
-		if spellName then -- update buffs
+		if spellName ~= nil then -- update buffs
 			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
 			startTimerButton(gGUID, remain, wfc.icons[gGUID])
