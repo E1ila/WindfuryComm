@@ -20,19 +20,12 @@ local combatWfStart
 local combatUptime
 local selfName = UnitName("player")
 
--- new message format C_ChatInfo.SendAddonMessage("WF_STATUS", "<guid>:<id>:<expire>:<lagHome>:additional:stuff", "PARTY")
-function windfuryDurationCheck()
-	local msg
-	local _,_,lagHome,_ = GetNetStats()
-	local mh,expiration,_,enchid,_,_,_,_ = GetWeaponEnchantInfo("player")
-	local combat = InCombatLockdown() and "1" or "0"
-	local isdead = UnitIsDeadOrGhost("player") and "1" or "0"
-
-	if not combatStart and combat == "1" then
+local function checkCombatStartOrEnd(combat)
+	if not combatStart and combat then
 		-- combat started
 		combatStart = GetTime()
 		combatUptime = 0
-	elseif combatStart and combat == "0" then
+	elseif combatStart and not combat then
 		-- combat ended
 		if combatWfStart then
 			-- combat ended with wf, sum uptime
@@ -50,28 +43,47 @@ function windfuryDurationCheck()
 		combatStart = nil
 		combatWfStart = nil
 	end
+end
+
+local function checkCombatWfStart(enchid)
+	local spellName = WF_ENCHANT_SPELL_ID[enchid]
+	if spellName then
+		if combatStart and not combatWfStart then
+			-- combat started with wf, take time
+			combatWfStart = GetTime()
+		end
+	end
+end
+
+local function checkCombatWfDrop()
+	if combatStart and combatWfStart then
+		combatUptime = combatUptime + (GetTime() - combatWfStart)
+		-- wf dropped in combat, sum uptime
+		combatWfStart = nil
+	end
+end
+
+-- new message format C_ChatInfo.SendAddonMessage("WF_STATUS", "<guid>:<id>:<expire>:<lagHome>:additional:stuff", "PARTY")
+function windfuryDurationCheck()
+	local msg
+	local _,_,lagHome,_ = GetNetStats()
+	local mh,expiration,_,enchid,_,_,_,_ = GetWeaponEnchantInfo("player")
+	local combat = InCombatLockdown() and "1" or "0"
+	local isdead = UnitIsDeadOrGhost("player") and "1" or "0"
+
+	checkCombatStartOrEnd(combat == "1");
 
 	if mh then
 		-- report wf expiration time
 		msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor)
-		local spellName = WF_ENCHANT_SPELL_ID[enchid]
-		if spellName then
-			if combatStart and not combatWfStart then
-				-- combat started with wf, take time
-				combatWfStart = GetTime()
-			end
-		end
+		checkCombatWfStart(enchid)
 		if lastExpiration == nil or expiration > lastExpiration then
 			hasRefreshed = true
 		end
 	else
 		-- report expired wf
 		msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor)
-		if combatStart and combatWfStart then
-			combatUptime = combatUptime + (GetTime() - combatWfStart)
-			-- wf dropped in combat, sum uptime
-			combatWfStart = nil
-		end
+		checkCombatWfDrop()
 	end
 	lastExpiration = expiration
 

@@ -1,6 +1,5 @@
 wfc = CreateFrame("Frame", "wfc")
 wfc.currentTimers, wfc.buttons = {}, {}
-wfc.UptimeReportHook = nil
 wfc.ixs, wfc.party, wfc.guids, wfc.icons, wfc.class, wfc.version = {}, {}, {}, {}, {}, {}
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -11,6 +10,7 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 local pClass = select(2, UnitClass("player"))
 local wfcLib = LibStub("LibWFcomm")
 local COMM_PREFIX = "WF_STATUS"
+local encounterEnded = nil
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
@@ -91,9 +91,20 @@ end
 local function registerWfComm()
 	if wfcLib then
 		wfcLib.UptimeReportHook = function (combatTime, combatUptime, shaman, reporter, channel)
-			debug("Combat uptime of", tostring(math.floor(combatUptime / combatTime * 100))..'%', 'by', '|cff0070DE'..shaman)
-			if wfc.UptimeReportHook then
-				wfc.UptimeReportHook(combatTime, combatUptime, shaman, reporter, channel)
+			if encounterEnded then
+				local uptime = math.floor(combatUptime / combatTime * 100)
+				local color = "|cffff0000"
+				if uptime > 90 then
+					color = "|cff00ff00"
+				elseif uptime > 80 then
+					color = "|cffb9f542"
+				elseif uptime > 50 then
+					color = "|cfff5ef42"
+				elseif uptime > 25 then
+					color = "|cfff5a142"
+				end
+				out('Encounter|cff00ff00', encounterEnded, '|rended with uptime of'..color, tostring(uptime)..'%', '|rby', '|cff0070DE'..shaman)
+				encounterEnded = nil
 			end
 		end
 	else
@@ -305,16 +316,26 @@ local function wfSlashCommands(entry)
 		out("/wfc size <integer> (" .. wfcdb.size .. ")")
 		out("/wfc warn <integer> (" .. wfcdb.warnsize .. ")")
 		out("/wfc spacing <integer> (" .. wfcdb.space .. ")")
+		out("/wfc ver")
 		out("/wfc <hide/show>")
 	end
 end
 
-if pClass == "SHAMAN" then
-	SLASH_WFC1 = "/wfc"
-	SlashCmdList["WFC"] = wfSlashCommands
-	wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
+wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
+	if pClass == "SHAMAN" then
 		return wfc[event](self, event, ...)
-	end)
-end
+	elseif ( pClass == "WARRIOR" or pClass == "ROGUE" ) then
+		if event == "ENCOUNTER_END" then
+			debug("ENCOUNTER_END", ...)
+			local _, encounterName, _, _, _ = ...
+			encounterEnded = encounterName
+		end
+	end
+end)
 
-C_Timer.After(2, function() registerWfComm() end)
+SLASH_WFC1 = "/wfc"
+SlashCmdList["WFC"] = wfSlashCommands
+
+if ( pClass == "WARRIOR" or pClass == "ROGUE" ) then
+	C_Timer.After(2, function() registerWfComm() end)
+end
