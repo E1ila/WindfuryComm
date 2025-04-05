@@ -18,6 +18,7 @@ local myShaman
 local combatStart
 local combatWfStart
 local combatUptime
+local selfName = UnitName("player")
 
 -- new message format C_ChatInfo.SendAddonMessage("WF_STATUS", "<guid>:<id>:<expire>:<lagHome>:additional:stuff", "PARTY")
 function windfuryDurationCheck()
@@ -42,6 +43,9 @@ function windfuryDurationCheck()
 			local combatTime = GetTime() - combatStart
 			local creditmsg = format("%d:%d:%s", math.floor(combatTime + 0.5), math.floor(combatUptime + 0.5), myShaman)
 			CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+			if LibWFcomm.UptimeReportHook then
+				LibWFcomm.UptimeReportHook(combatTime, combatUptime, myShaman, selfName, 'DIRECT')
+			end
 		end
 		combatStart = nil
 		combatWfStart = nil

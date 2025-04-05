@@ -1,5 +1,6 @@
 wfc = CreateFrame("Frame", "wfc")
 wfc.currentTimers, wfc.buttons = {}, {}
+wfc.UptimeReportHook = nil
 wfc.ixs, wfc.party, wfc.guids, wfc.icons, wfc.class, wfc.version = {}, {}, {}, {}, {}, {}
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -84,6 +85,19 @@ local function modLayout()
 		if warnsize == 0 then
 			wfc.buttons[i].bg:Hide()
 		end
+	end
+end
+
+local function registerWfComm()
+	if wfcLib then
+		wfcLib.UptimeReportHook = function (combatTime, combatUptime, shaman, reporter, channel)
+			debug("Combat uptime of", tostring(math.floor(combatUptime / combatTime * 100))..'%', 'by', '|cff0070DE'..shaman)
+			if wfc.UptimeReportHook then
+				wfc.UptimeReportHook(combatTime, combatUptime, shaman, reporter, channel)
+			end
+		end
+	else
+		out("LibWFcomm not found!!")
 	end
 end
 
@@ -302,3 +316,5 @@ if pClass == "SHAMAN" then
 		return wfc[event](self, event, ...)
 	end)
 end
+
+C_Timer.After(2, function() registerWfComm() end)
