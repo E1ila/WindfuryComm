@@ -1,6 +1,6 @@
 assert(LibStub, "WindfuryComm requires LibStub")
 
-local major, minor = "LibWFcomm", 2
+local major, minor = "LibWFcomm", 3
 local LibWFcomm = LibStub:NewLibrary(major, minor)
 local CTL = _G.ChatThrottleLib
 local COMM_PREFIX = "WF_STATUS"
@@ -19,14 +19,15 @@ function windfuryDurationCheck()
 	local _,_,lagHome,_ = GetNetStats()
 	local mh,expiration,_,enchid,_,_,_,_ = GetWeaponEnchantInfo("player")
 	local combat = InCombatLockdown() and "1" or "0"
+	local isdead = UnitIsDeadOrGhost("player") and "1" or "0"
 
 	if mh then
-		msg = format("%s:%d:%d:%d:%s", pGUID, enchid, expiration, lagHome, combat) -- message: wf active + duration
+		msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor) -- message: wf active + duration
 		if lastExpiration == nil or expiration > lastExpiration then
 			hasRefreshed = true
 		end
 	else
-		msg = format("%s:nil:nil:%s:%s", pGUID, lagHome, combat) -- message: wf expired
+		msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor) -- message: wf expired
 	end
 	lastExpiration = expiration
 	--print('LibWFcomm', mh, expiration, lastStatus, hasRefreshed)
