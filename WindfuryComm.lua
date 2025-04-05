@@ -149,6 +149,13 @@ local function setBlockerButton(gGUID, remain, spellID)
 	end
 end
 
+local function partyPlayerDead(playerIndex)
+	wfc.buttons[playerIndex].icon:SetAlpha(1)
+	wfc.buttons[playerIndex].icon:SetDesaturated(1)
+	wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
+	wfc.buttons[playerIndex].bg:SetAlpha(0)
+end
+
 local function showWarning(playerIndex, combat)
 	wfc.buttons[playerIndex].icon:SetAlpha(1)
 	wfc.buttons[playerIndex].icon:SetDesaturated(1)
@@ -209,7 +216,9 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 
 		wfc.version[sender] = version or "-"
 
-		if spellName ~= nil then -- update buffs
+		if isdead == "1" then
+			partyPlayerDead(playerIndex)
+		elseif spellName ~= nil then -- update buffs
 			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
 			startTimerButton(gGUID, remain, wfc.icons[gGUID])

@@ -68,11 +68,15 @@ function LibWFcomm:GROUP_ROSTER_UPDATE()
 		LibWFcomm.eventReg:RegisterUnitEvent("UNIT_INVENTORY_CHANGED", "player")
 		LibWFcomm.eventReg:RegisterEvent("PLAYER_REGEN_DISABLED")
 		LibWFcomm.eventReg:RegisterEvent("PLAYER_REGEN_ENABLED")
+		LibWFcomm.eventReg:RegisterEvent("PLAYER_DEAD")
+		LibWFcomm.eventReg:RegisterEvent("PLAYER_ALIVE")
 		C_Timer.After(0.15, function() windfuryDurationCheck() end)
 	else
 		LibWFcomm.eventReg:UnregisterEvent("UNIT_INVENTORY_CHANGED")
 		LibWFcomm.eventReg:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		LibWFcomm.eventReg:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		LibWFcomm.eventReg:UnregisterEvent("PLAYER_DEAD")
+		LibWFcomm.eventReg:UnregisterEvent("PLAYER_ALIVE")
 	end
 end
 
@@ -91,6 +95,14 @@ function LibWFcomm:PLAYER_REGEN_DISABLED()
 end
 
 function LibWFcomm:PLAYER_REGEN_ENABLED()
+	C_Timer.After(0.15, function() windfuryDurationCheck() end)
+end
+
+function LibWFcomm:PLAYER_DEAD()
+	C_Timer.After(0.15, function() windfuryDurationCheck() end)
+end
+
+function LibWFcomm:PLAYER_ALIVE()
 	C_Timer.After(0.15, function() windfuryDurationCheck() end)
 end
 
