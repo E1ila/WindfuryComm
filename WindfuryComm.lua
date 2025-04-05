@@ -1,6 +1,6 @@
 wfc = CreateFrame("Frame", "wfc")
 wfc.currentTimers, wfc.buttons = {}, {}
-wfc.ixs, wfc.party, wfc.guids, wfc.icons, wfc.class = {}, {}, {}, {}, {}
+wfc.ixs, wfc.party, wfc.guids, wfc.icons, wfc.class, wfc.version = {}, {}, {}, {}, {}, {}
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
 wfc.eventReg:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -9,13 +9,11 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 
 local pClass = select(2, UnitClass("player"))
 local wfcLib = LibStub("LibWFcomm")
-local COMM_PREFIX_OLD = "WFC01"
 local COMM_PREFIX = "WF_STATUS"
 local COMM_PREFIX_RAID = "WF_RAID_STATUS"
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_RAID)
-C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_OLD)
 
 local classIcon = {
 	["WARRIOR"] = "Interface\\Icons\\inv_sword_27",
@@ -150,6 +148,22 @@ local function setBlockerButton(gGUID, remain, spellID)
 	end
 end
 
+function wfc:ShowWarning(playerIndex, combat)
+	wfc.buttons[playerIndex].icon:SetAlpha(1)
+	wfc.buttons[playerIndex].icon:SetDesaturated(1)
+	wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
+	if combat == "0" then
+		wfc.buttons[playerIndex].bg:SetAlpha(0.2)
+		wfc.buttons[playerIndex].bg:SetColorTexture(1, 1, 0)
+	else
+		wfc.buttons[playerIndex].bg:SetAlpha(1)
+		wfc.buttons[playerIndex].bg:SetColorTexture(1, 0, 0)
+	end
+	if wfcdb.warnsize then
+		wfc.buttons[playerIndex].bg:Show()
+	end
+end
+
 local function currentTimers()
 	wipe(wfc.currentTimers)
 	for j = 0, 3 do
@@ -181,25 +195,7 @@ function wfc:GROUP_ROSTER_UPDATE()
 end
 
 function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
-	if prefix == COMM_PREFIX_OLD then -- my old API
-		local commType, expiration, lag, gGUID = strsplit(":", message)
-		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', expiration)
-		expiration, lag = tonumber(expiration), tonumber(lag)
-		if not wfc.ixs[gGUID] then
-			return
-		end
-		local j = wfc.ixs[gGUID]
-		if commType == "W" then -- message w/ wf duration, should always fire on application)
-			local _, _, lagHome, _ = GetNetStats()
-			local remain = (expiration - (lag + lagHome)) / 1000
-			startTimerButton(gGUID, remain, wfc.icons[gGUID])
-		elseif commType == "E" then -- message wf lost
-			wfc.buttons[j].icon:SetDesaturated(1)
-			wfc.buttons[j].cd:SetCooldown(0, 0)
-		elseif commType == "I" then -- message signaling that unit has addon installed
-			wfc.buttons[j].icon:SetAlpha(1)
-		end
-	elseif prefix == COMM_PREFIX then --new API
+	if prefix == COMM_PREFIX then --new API
 		local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
 		local playerIndex = wfc.ixs[gGUID]
 		if not playerIndex then
@@ -215,22 +211,6 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		else -- addon installed or buff expired
 			self:ShowWarning(playerIndex, combat)
 		end
-	end
-end
-
-function wfc:ShowWarning(playerIndex, combat)
-	wfc.buttons[playerIndex].icon:SetAlpha(1)
-	wfc.buttons[playerIndex].icon:SetDesaturated(1)
-	wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
-	if combat == "0" then
-		wfc.buttons[playerIndex].bg:SetAlpha(0.2)
-		wfc.buttons[playerIndex].bg:SetColorTexture(1, 1, 0)
-	else
-		wfc.buttons[playerIndex].bg:SetAlpha(1)
-		wfc.buttons[playerIndex].bg:SetColorTexture(1, 0, 0)
-	end
-	if wfcdb.warnsize then
-		wfc.buttons[playerIndex].bg:Show()
 	end
 end
 
