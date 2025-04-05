@@ -59,7 +59,7 @@ end
 function LibWFcomm:PLAYER_LOGIN()
 	self.eventReg:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:GROUP_ROSTER_UPDATE()
-	print( "WindfuryComm sender module loaded" )
+	print( "WindfuryComm++ sender module loaded" )
 end
 
 function LibWFcomm:GROUP_ROSTER_UPDATE()

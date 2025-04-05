@@ -2,7 +2,7 @@
 ## Title: WindfuryComm
 ## Author: Yotta, Kof
 ## SavedVariables: wfcdb
-## v1.4
+## v1.4.2
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua

@@ -23,7 +23,18 @@ local classIcon = {
 	-- ["HUNTER"] = "Interface\\Icons\\inv_weapon_bow_07",
 	["ROGUE"] = "Interface\\Icons\\inv_throwingknife_04",
 }
-local spellTable = { [564] = true, [563] = true, [1783] = true }
+-- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
+local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
+
+local function out(text, ...)
+	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)
+end
+
+local function debug(text, ...)
+	if wfcdb.debug then
+		out(text, ...)
+	end
+end
 
 local function initFrames() -- initialize the frames on screen
 	wfcBgFrame = CreateFrame("Frame", "wfcBgFrame", UIParent)
@@ -171,15 +182,15 @@ end
 
 function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 	if prefix == COMM_PREFIX_OLD then -- my old API
-		--print(prefix, message, channel, sender)
 		local commType, expiration, lag, gGUID = strsplit(":", message)
+		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', expiration)
 		expiration, lag = tonumber(expiration), tonumber(lag)
 		if not wfc.ixs[gGUID] then
 			return
 		end
 		local j = wfc.ixs[gGUID]
 		if commType == "W" then -- message w/ wf duration, should always fire on application)
-			local down, up, lagHome, lagWorld = GetNetStats()
+			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
 			startTimerButton(gGUID, remain, wfc.icons[gGUID])
 		elseif commType == "E" then -- message wf lost
@@ -189,35 +200,37 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 			wfc.buttons[j].icon:SetAlpha(1)
 		end
 	elseif prefix == COMM_PREFIX then --new API
-		--print(prefix, message, channel, sender)
 		local gGUID, spellID, expiration, lag, combat = strsplit(":", message)
-		if not wfc.ixs[gGUID] then
+		local playerIndex = wfc.ixs[gGUID]
+		if not playerIndex then
 			return
 		end
-		local j, spellID, expire, lagHome = wfc.ixs[gGUID], tonumber(spellID), tonumber(expire), tonumber(lagHome)
-		if spellTable[spellID] then --update buffs
-			local down, up, lagHome, lagWorld = GetNetStats()
+		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration) / 1000, tonumber(lagHome)
+		local spellName = spellTable[spellID]
+		debug('|cff99ff00'..channel..'|r', '|cff999999'..prefix..'|r', '|c99ff9900'..sender..'|r', spellName or spellID, expiration, combat)
+		if spellName then -- update buffs
+			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
 			startTimerButton(gGUID, remain, wfc.icons[gGUID])
-			-- elseif( spellID ) then
-			-- local down, up, lagHome, lagWorld = GetNetStats()
-			-- local remain = (expiration - (lag + lagHome))/1000
-			-- setBlockerButton(gGUID, remain, spellID)
-		else --if( not spellID ) then --addon installed or buff expired
-			wfc.buttons[j].icon:SetAlpha(1)
-			wfc.buttons[j].icon:SetDesaturated(1)
-			wfc.buttons[j].cd:SetCooldown(0, 0)
-			if combat == "0" then
-				wfc.buttons[j].bg:SetAlpha(0.2)
-				wfc.buttons[j].bg:SetColorTexture(1, 1, 0)
-			else
-				wfc.buttons[j].bg:SetAlpha(1)
-				wfc.buttons[j].bg:SetColorTexture(1, 0, 0)
-			end
-			if wfcdb.warnsize then
-				wfc.buttons[j].bg:Show()
-			end
+		else -- addon installed or buff expired
+			self:ShowWarning(playerIndex, combat)
 		end
+	end
+end
+
+function wfc:ShowWarning(playerIndex, combat)
+	wfc.buttons[playerIndex].icon:SetAlpha(1)
+	wfc.buttons[playerIndex].icon:SetDesaturated(1)
+	wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
+	if combat == "0" then
+		wfc.buttons[playerIndex].bg:SetAlpha(0.2)
+		wfc.buttons[playerIndex].bg:SetColorTexture(1, 1, 0)
+	else
+		wfc.buttons[playerIndex].bg:SetAlpha(1)
+		wfc.buttons[playerIndex].bg:SetColorTexture(1, 0, 0)
+	end
+	if wfcdb.warnsize then
+		wfc.buttons[playerIndex].bg:Show()
 	end
 end
 
@@ -233,6 +246,7 @@ function wfc:ADDON_LOADED()
 		yspace = 0,
 		xspace = 1,
 	}
+	--if not wfcdb.debug then wfcdb.debug = false end
 	initFrames() -- initiate frames early
 	modLayout()
 end
@@ -260,6 +274,9 @@ local function wfSlashCommands(entry)
 		-- If not handled above, display some sort of help message
 		wfcdb.warnsize = tonumber(arg2)
 		modLayout()
+	elseif arg1 == "debug" then
+		wfcdb.debug = not wfcdb.debug
+		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
 	elseif arg1 == "show" then
 		wfcBgFrame:Show()
 		for i = 0, 3 do
@@ -271,18 +288,18 @@ local function wfSlashCommands(entry)
 			wfc.buttons[i]:Hide()
 		end
 	else
-		print("WindfuryComm commands:")
-		print("/wfcomm orientation <horizontal/vertical>")
-		print("/wfcomm size <integer> (" .. wfcdb.size .. ")")
-		print("/wfcomm warn <integer> (" .. wfcdb.warnsize .. ")")
-		print("/wfcomm spacing <integer> (" .. wfcdb.space .. ")")
-		print("/wfcomm <hide/show>")
+		out("WindfuryComm++ commands:")
+		out("/wfc orientation <horizontal/vertical>")
+		out("/wfc size <integer> (" .. wfcdb.size .. ")")
+		out("/wfc warn <integer> (" .. wfcdb.warnsize .. ")")
+		out("/wfc spacing <integer> (" .. wfcdb.space .. ")")
+		out("/wfc <hide/show>")
 	end
 end
 
 if pClass == "SHAMAN" then
-	SLASH_WFCOMM1 = "/wfcomm"
-	SlashCmdList["WFCOMM"] = wfSlashCommands
+	SLASH_WFC1 = "/wfc"
+	SlashCmdList["WFC"] = wfSlashCommands
 	wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		return wfc[event](self, event, ...)
 	end)
