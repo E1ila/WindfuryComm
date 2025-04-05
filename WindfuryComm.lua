@@ -69,7 +69,7 @@ local function initFrames() -- initialize the frames on screen
 end
 
 local function modLayout()
-	local warnsize = wfcdb.warnsize or 0
+	local warnsize = wfcdb.warnsize or 4
 	local xsize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.xspace * 3
 	local ysize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.yspace * 3
 	wfcBgFrame:SetSize(xsize, ysize)
