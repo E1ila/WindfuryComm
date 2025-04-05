@@ -37,11 +37,11 @@ function windfuryDurationCheck()
 			-- combat ended with wf, sum uptime
 			combatUptime = combatUptime + (GetTime() - combatWfStart)
 		end
-		if myShaman then
+		if myShaman and combatUptime > 1 then
 			-- report uptime
 			local combatTime = GetTime() - combatStart
 			local creditmsg = format("%d:%d:%s", math.floor(combatTime + 0.5), math.floor(combatUptime + 0.5), myShaman)
-			CTL:SendAddonMessage("NORMAL", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+			CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
 		end
 		combatStart = nil
 		combatWfStart = nil
