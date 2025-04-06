@@ -177,8 +177,15 @@ end
 
 function LibWFcomm:PLAYER_LOGIN()
     self.eventReg:RegisterEvent("GROUP_ROSTER_UPDATE")
+    self.eventReg:RegisterEvent("PARTY_MEMBER_ENABLE")
     self:GROUP_ROSTER_UPDATE()
     print("WindfuryComm++ sender module loaded")
+end
+
+function LibWFcomm:PARTY_MEMBER_ENABLE(unitId)
+    if (select(2, UnitClass(unitId)) == "SHAMAN") then
+        self:GROUP_ROSTER_UPDATE()
+    end
 end
 
 function LibWFcomm:GROUP_ROSTER_UPDATE()

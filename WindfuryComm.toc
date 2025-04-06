@@ -6,7 +6,7 @@
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
-libs\LibWFcomm\LibWFcomm.lua
+libs\LibWFcomm\LibWFcomm.xml
 #@end-no-lib-strip@
 
 WindfuryComm.lua
