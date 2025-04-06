@@ -91,7 +91,7 @@ end
 local function registerWfComm()
 	if wfcLib then
 		wfcLib.UptimeReportHook = function (combatTime, combatUptime, shaman, reporter, channel)
-			if encounterEnded then
+			if encounterEnded or wfcdb.alwaysReport then
 				local uptime = math.floor(combatUptime / combatTime * 100)
 				local color = "|cffff0000"
 				if uptime > 90 then
@@ -103,7 +103,11 @@ local function registerWfComm()
 				elseif uptime > 25 then
 					color = "|cfff5a142"
 				end
-				out('Encounter|cff00ff00', encounterEnded, '|rended with uptime of'..color, tostring(uptime)..'%', '|rby', '|cff0070DE'..shaman)
+				if encounterEnded then
+					out('Encounter|cff00ff00', encounterEnded, '|rended with uptime of'..color, tostring(uptime)..'%', '|rby', '|cff0070DE'..shaman)
+				else
+					out('Combat ended with uptime of'..color, tostring(uptime)..'%', '|rby', '|cff0070DE'..shaman)
+				end
 				encounterEnded = nil
 			end
 		end
@@ -293,6 +297,14 @@ local function wfSlashCommands(entry)
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
+	elseif arg1 == "ar" then
+		if wfcdb.alwaysReport then
+			wfcdb.alwaysReport = false
+			out("Will only report Windfury uptime after boss fights")
+		else
+			wfcdb.alwaysReport = true
+			out("Will report Windfury uptime after each fight")
+		end
 	elseif arg1 == "ver" then
 		for k, v in pairs(wfc.version) do
 			local name = GetUnitName(k)
@@ -317,6 +329,7 @@ local function wfSlashCommands(entry)
 		out("/wfc warn <integer> (" .. wfcdb.warnsize .. ")")
 		out("/wfc spacing <integer> (" .. wfcdb.space .. ")")
 		out("/wfc ver")
+		out("/wfc ar - always report wf uptime, after each fight")
 		out("/wfc <hide/show>")
 	end
 end
