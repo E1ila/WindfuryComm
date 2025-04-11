@@ -62,7 +62,6 @@ local function checkCombatStartOrEnd(combat)
         cs.time.WF = 0
     elseif cs.start.combat and not combat then
         -- combat ended
-        -- loop TRACKED_AURAS_LIST and sum time
         for _, spellCategory in ipairs(TRACKED_AURAS_LIST) do
             if cs.start[spellCategory] then
                 cs.time[spellCategory] = cs.time[spellCategory] + (GetTime() - cs.start[spellCategory])
@@ -72,20 +71,19 @@ local function checkCombatStartOrEnd(combat)
         local combatTime = math.floor(GetTime() - cs.start.combat + 0.5)
         if myShaman and combatTime > 1 then
             -- report uptime
-            local wfTime = math.floor((cs.time.WF or 0) + 0.5)
-            local strTime = math.floor((cs.time.STR or 0) + 0.5)
-            local agiTime = math.floor((cs.time.AGI or 0) + 0.5)
-            local frTime = math.floor((cs.time.FR or 0) + 0.5)
-            local frrTime = math.floor((cs.time.FrR or 0) + 0.5)
-            local gndTime = math.floor((cs.time.GND or 0) + 0.5)
+            local wfTime = math.min(math.floor((cs.time.WF or 0) + 0.5), combatTime)
+            local strTime = math.min(math.floor((cs.time.STR or 0) + 0.5), combatTime)
+            local agiTime = math.min(math.floor((cs.time.AGI or 0) + 0.5), combatTime)
+            local frTime = math.min(math.floor((cs.time.FR or 0) + 0.5), combatTime)
+            local frrTime = math.min(math.floor((cs.time.FrR or 0) + 0.5), combatTime)
+            local gndTime = math.min(math.floor((cs.time.GND or 0) + 0.5), combatTime)
             local creditmsg = format("%d:%d:%s:%d:%d:%d:%d:%d", combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime)
             CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
             if LibWFcomm.UptimeReportHook then
                 LibWFcomm.UptimeReportHook(combatTime, cs.time.WF, myShaman, strTime, agiTime, frTime, frrTime, gndTime, selfName, 'DIRECT')
             end
         end
-        cs.start.combat = nil
-        cs.start.WF = nil
+        cs.start = {}
     end
 end
 
@@ -101,7 +99,7 @@ end
 
 local function checkCombatWfDrop()
     if cs.start.combat and cs.start.WF then
-        cs.time.WF = cs.time.WF + (GetTime() - cs.start.WF)
+        cs.time.WF = (cs.time.WF or 0) + (GetTime() - cs.start.WF)
         -- wf dropped in combat, sum uptime
         cs.start.WF = nil
     end
