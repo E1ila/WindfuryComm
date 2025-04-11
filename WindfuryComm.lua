@@ -10,7 +10,7 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 local pClass = select(2, UnitClass("player"))
 local wfcLib = LibStub("LibWFcomm")
 local COMM_PREFIX = "WF_STATUS"
-local encounterEnded = nil
+local encounter = nil
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
@@ -207,11 +207,11 @@ end
 local function registerWfComm()
 	if wfcLib then
 		wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-			if encounterEnded or wfcdb.alwaysReport then
+			if combatTime > 1 and (encounter or wfcdb.alwaysReport) then
 				local wfUP = math.floor(wfTime / combatTime * 100)
 				local msg
-				if encounterEnded then
-					msg = 'Encounter |cff00ff00'..encounterEnded..'|r ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
+				if encounter and (not encounter.finish or GetTime() - encounter.finish < 5) then
+					msg = 'Encounter |cff00ff00'..encounter.name..'|r ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
 				else
 					msg = 'Combat ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
 				end
@@ -230,8 +230,8 @@ local function registerWfComm()
 				if gndTime > 0 then
 					msg = msg..' |cffff8800GND|r:'..uptimePercent(math.floor(gndTime / combatTime * 100))
 				end
-				out(msg..' by |cff0070DE'..shaman)
-				encounterEnded = nil
+				out(msg..' by |cff0070DE'..tostring(shaman or '??'))
+				encounter = nil
 			end
 		end
 	else
@@ -367,10 +367,19 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	if pClass == "SHAMAN" then
 		return wfc[event](self, event, ...)
 	elseif ( pClass == "WARRIOR" or pClass == "ROGUE" ) then
-		if event == "ENCOUNTER_END" then
+		if event == "ENCOUNTER_START" then
+			debug("ENCOUNTER_START", ...)
+			encounter = {
+				id = select(1, ...),
+				name = select(2, ...),
+				start = GetTime(),
+			}
+		elseif event == "ENCOUNTER_END" and encounter then
 			debug("ENCOUNTER_END", ...)
-			local _, encounterName, _, _, _ = ...
-			encounterEnded = encounterName
+			local id = select(1, ...)
+			if id == encounter.id then
+				encounter.finish = GetTime()
+			end
 		end
 	end
 end)
