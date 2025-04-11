@@ -79,8 +79,8 @@ local function checkCombatStartOrEnd(combat)
             local gndTime = math.min(math.floor((cs.time.GND or 0) + 0.5), combatTime)
             local creditmsg = format("%d:%d:%s:%d:%d:%d:%d:%d", combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime)
             CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
-            if LibWFcomm.UptimeReportHook then
-                LibWFcomm.UptimeReportHook(combatTime, cs.time.WF, myShaman, strTime, agiTime, frTime, frrTime, gndTime, selfName, 'DIRECT')
+            if LibWFcomm and LibWFcomm.UptimeReportHook then
+                LibWFcomm.UptimeReportHook(combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime, selfName, 'DIRECT')
             end
         end
         cs.start = {}
