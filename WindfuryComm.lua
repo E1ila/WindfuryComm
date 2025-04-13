@@ -206,8 +206,9 @@ end
 
 local function registerWfComm()
 	if wfcLib then
+		local db = wfcdb
 		wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-			if combatTime > 1 and (encounter or wfcdb.alwaysReport) then
+			if combatTime > 1 and (encounter or db and db.alwaysReport) then
 				local wfUP = math.floor(wfTime / combatTime * 100)
 				local msg
 				if encounter and (not encounter.finish or GetTime() - encounter.finish < 5) then
