@@ -9,4 +9,5 @@ libs\LibStub\LibStub.lua
 libs\LibWFcomm\LibWFcomm.xml
 #@end-no-lib-strip@
 
+ShamanUI.lua
 WindfuryComm.lua
