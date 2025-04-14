@@ -39,7 +39,7 @@ local function registerUptimeReport(wfcLib)
                 if gndTime > 0 then
                     msg = msg..' |cffff8800GND|r:'..uptimePercent(math.floor(gndTime / combatTime * 100))
                 end
-                out(msg..' by |cff0070DE'..tostring(shaman or '??'))
+                wfc.out(msg..' by |cff0070DE'..tostring(shaman or '??'))
                 encounter = nil
             end
         end
@@ -65,4 +65,22 @@ function wfcMeleeFrame:init(wfcLib)
     self:updateSessionViewText()
     self:Show()
     registerUptimeReport(wfcLib)
+end
+
+function wfcMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
+    wfc.debug("ENCOUNTER_START", encounterId, encounterName)
+    encounter = {
+        id = encounterId,
+        name = encounterName,
+        start = GetTime(),
+    }
+end
+
+function wfcMeleeFrame:ENCOUNTER_END(encounterId)
+    if encounter then
+        wfc.debug("ENCOUNTER_END", encounterId)
+        if encounterId == encounter.id then
+            encounter.finish = GetTime()
+        end
+    end
 end

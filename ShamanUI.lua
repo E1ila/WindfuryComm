@@ -9,6 +9,9 @@ local classIcon = {
     ["ROGUE"] = "Interface\\Icons\\inv_throwingknife_04",
 }
 
+-- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
+local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
+
 function wfcShamanFrame:initFrames() -- initialize the frames on screen
     self:SetPoint("CENTER", UIParent, 0, -225)
     --wfcShamanFrame.texture = wfcShamanFrame:CreateTexture(nil, "BACKGROUND")
@@ -63,11 +66,14 @@ function wfcShamanFrame:modLayout()
     end
 end
 
-function wfcShamanFrame:getPartySig()
+local function getPartySig()
     local sig = ""
     for index = 1, 4 do
         local pstring = "party" .. index
-        sig = sig..UnitGUID(pstring)
+        local guid = UnitGUID(pstring)
+        if guid then
+            sig = sig..UnitGUID(pstring)
+        end
     end
     return sig
 end
@@ -173,4 +179,45 @@ function wfcShamanFrame:restartCurrentTimers()
         end
     end
     wipe(self.currentTimers)
+end
+
+function wfcShamanFrame:GROUP_ROSTER_UPDATE()
+    if GetNumGroupMembers() == 0 then
+        self:resetGroup()
+    else
+        local partySig = getPartySig()
+        if partySig ~= self.partySig then
+            self:updateCurrentTimers()
+            self:resetGroup()
+            self:collectGroupInfo()
+            self:restartCurrentTimers()
+            self.partySig = partySig
+        end
+    end
+end
+
+function wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
+    if prefix == COMM_PREFIX then --new API
+        local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
+        local playerIndex = self.ixs[gGUID]
+        if not playerIndex then
+            return
+        end
+        spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
+        local spellName = spellTable[spellID]
+
+        wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
+
+        wfc.version[sender] = version or "-"
+
+        if isdead == "1" then
+            self:partyPlayerDead(playerIndex)
+        elseif spellName ~= nil then -- update buffs
+            local _, _, lagHome, _ = GetNetStats()
+            local remain = (expiration - (lag + lagHome)) / 1000
+            self:startTimerButton(gGUID, remain)
+        else -- addon installed or buff expired
+            self:showWarning(playerIndex, combat)
+        end
+    end
 end

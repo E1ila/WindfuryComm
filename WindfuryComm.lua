@@ -19,12 +19,10 @@ local wfcLib = LibStub("LibWFcomm")
 local COMM_PREFIX = "WF_STATUS"
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
--- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
-local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
-
 local function out(text, ...)
 	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)
 end
+wfc.out = out
 
 local function debug(text, ...)
 	if wfcdb.debug then
@@ -33,49 +31,16 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
-function wfc:GROUP_ROSTER_UPDATE(...)
-	if GetNumGroupMembers() == 0 then
-		wfcShamanFrame:resetGroup()
-	else
-		local partySig = wfcShamanFrame.getPartySig()
-		if partySig ~= wfcShamanFrame.partySig then
-			wfcShamanFrame:updateCurrentTimers()
-			wfcShamanFrame:resetGroup()
-			wfcShamanFrame:collectGroupInfo()
-			wfcShamanFrame:restartCurrentTimers()
-			wfcShamanFrame.partySig = partySig
-		end
-	end
+function wfc:GROUP_ROSTER_UPDATE()
+	wfcShamanFrame:GROUP_ROSTER_UPDATE()
 end
 
-function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
-	if prefix == COMM_PREFIX then --new API
-		local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
-		local playerIndex = wfcShamanFrame.ixs[gGUID]
-		if not playerIndex then
-			return
-		end
-		spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
-		local spellName = spellTable[spellID]
-
-		debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
-
-		wfc.version[sender] = version or "-"
-
-		if isdead == "1" then
-			wfcShamanFrame:partyPlayerDead(playerIndex)
-		elseif spellName ~= nil then -- update buffs
-			local _, _, lagHome, _ = GetNetStats()
-			local remain = (expiration - (lag + lagHome)) / 1000
-			wfcShamanFrame:startTimerButton(gGUID, remain)
-		else -- addon installed or buff expired
-			wfcShamanFrame:showWarning(playerIndex, combat)
-		end
-	end
+function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
+	wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
 end
 
 function wfc:PLAYER_ENTERING_WORLD()
-	wfc:GROUP_ROSTER_UPDATE()
+	wfcShamanFrame:GROUP_ROSTER_UPDATE()
 end
 
 function wfc:ADDON_LOADED()
@@ -91,24 +56,6 @@ function wfc:ADDON_LOADED()
 		wfcShamanFrame:modLayout()
 	elseif isMelee then
 		wfcMeleeFrame:init(wfcLib)
-	end
-end
-
-function wfc:ENCOUNTER_START(encounterId, encounterName)
-	debug("ENCOUNTER_START", encounterId, encounterName)
-	encounter = {
-		id = encounterId,
-		name = encounterName,
-		start = GetTime(),
-	}
-end
-
-function wfc:ENCOUNTER_END(encounterId)
-	if encounter then
-		debug("ENCOUNTER_END", encounterId)
-		if encounterId == encounter.id then
-			encounter.finish = GetTime()
-		end
 	end
 end
 
@@ -184,21 +131,21 @@ local function wfSlashCommands(entry)
 end
 
 wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
+	if event == "ADDON_LOADED" then
+		wfc:ADDON_LOADED(...)
+	end
 	if isShaman then
-		if 	event == "ADDON_LOADED" or
-			event == "PLAYER_ENTERING_WORLD" or
+		if 	event == "PLAYER_ENTERING_WORLD" or
 			event == "CHAT_MSG_ADDON" or
 			event == "GROUP_ROSTER_UPDATE"
 		then
-			return wfc[event](self, event, ...)
+			return wfc[event](self, ...)
 		end
 	elseif isMelee then
-		if event == "ADDON_LOADED" then
-			wfc:ADDON_LOADED(...)
-		elseif event == "ENCOUNTER_START" then
-			wfc:ENCOUNTER_START(...)
+		if event == "ENCOUNTER_START" then
+			wfcMeleeFrame:ENCOUNTER_START(...)
 		elseif event == "ENCOUNTER_END" then
-			wfc:ENCOUNTER_END(...)
+			wfcMeleeFrame:ENCOUNTER_END(...)
 		end
 	end
 end)
