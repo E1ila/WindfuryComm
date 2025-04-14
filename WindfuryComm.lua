@@ -1,6 +1,6 @@
 wfc = CreateFrame("Frame", "wfc")
-wfc.currentTimers, wfc.buttons = {}, {}
-wfc.ixs, wfc.party, wfc.guids, wfc.icons, wfc.class, wfc.version = {}, {}, {}, {}, {}, {}
+wfc.version = {}
+
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
 wfc.eventReg:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -12,10 +12,11 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
-local wfcLib = LibStub("LibWFcomm")
-local COMM_PREFIX = "WF_STATUS"
 local encounter
 
+local wfcLib = LibStub("LibWFcomm")
+
+local COMM_PREFIX = "WF_STATUS"
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
 -- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
@@ -30,25 +31,7 @@ local function debug(text, ...)
 		out(text, ...)
 	end
 end
-
-local function currentTimers()
-	wipe(wfc.currentTimers)
-	for j = 0, 3 do
-		if wfc.guids[j] then
-			gGUID = wfc.guids[j]
-			wfc.currentTimers[gGUID] = wfc.buttons[j].cd:GetCooldownDuration() / 1000
-		end
-	end
-end
-
-local function restartCurrentTimers()
-	for gGUID, j in pairs(wfc.ixs) do
-		if wfc.currentTimers[gGUID] then
-			wfcShamanFrame:startTimerButton(gGUID, wfc.currentTimers[gGUID], wfc.icons[gGUID])
-		end
-	end
-	wipe(wfc.currentTimers)
-end
+wfc.debug = debug
 
 local function uptimePercent(uptime)
 	local color = '|cffff0000'
@@ -104,17 +87,17 @@ function wfc:GROUP_ROSTER_UPDATE()
 	if GetNumGroupMembers() == 0 then
 		wfcShamanFrame:resetGroup()
 	else
-		currentTimers()
+		wfcShamanFrame:updateCurrentTimers()
 		wfcShamanFrame:resetGroup()
 		wfcShamanFrame:collectGroupInfo()
-		restartCurrentTimers()
+		wfcShamanFrame:restartCurrentTimers()
 	end
 end
 
 function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 	if prefix == COMM_PREFIX then --new API
 		local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
-		local playerIndex = wfc.ixs[gGUID]
+		local playerIndex = wfcShamanFrame.ixs[gGUID]
 		if not playerIndex then
 			return
 		end
@@ -130,7 +113,7 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		elseif spellName ~= nil then -- update buffs
 			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
-			wfcShamanFrame:startTimerButton(gGUID, remain, wfc.icons[gGUID])
+			wfcShamanFrame:startTimerButton(gGUID, remain)
 		else -- addon installed or buff expired
 			wfcShamanFrame:showWarning(playerIndex, combat)
 		end
@@ -216,14 +199,14 @@ local function wfSlashCommands(entry)
 		if isShaman then
 			wfcShamanFrame:Show()
 			for i = 0, 3 do
-				wfc.buttons[i]:Show()
+				wfcShamanFrame.buttons[i]:Show()
 			end
 		end
 	elseif arg1 == "hide" then
 		if isShaman then
 			wfcShamanFrame:Hide()
 			for i = 0, 3 do
-				wfc.buttons[i]:Hide()
+				wfcShamanFrame.buttons[i]:Hide()
 			end
 		end
 	else
