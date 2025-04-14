@@ -44,7 +44,7 @@ end
 local function restartCurrentTimers()
 	for gGUID, j in pairs(wfc.ixs) do
 		if wfc.currentTimers[gGUID] then
-			wfcBgFrame:startTimerButton(gGUID, wfc.currentTimers[gGUID], wfc.icons[gGUID])
+			wfcShamanFrame:startTimerButton(gGUID, wfc.currentTimers[gGUID], wfc.icons[gGUID])
 		end
 	end
 	wipe(wfc.currentTimers)
@@ -102,11 +102,11 @@ end
 
 function wfc:GROUP_ROSTER_UPDATE()
 	if GetNumGroupMembers() == 0 then
-		wfcBgFrame:resetGroup()
+		wfcShamanFrame:resetGroup()
 	else
 		currentTimers()
-		wfcBgFrame:resetGroup()
-		wfcBgFrame:collectGroupInfo()
+		wfcShamanFrame:resetGroup()
+		wfcShamanFrame:collectGroupInfo()
 		restartCurrentTimers()
 	end
 end
@@ -126,13 +126,13 @@ function wfc:CHAT_MSG_ADDON(event, prefix, message, channel, sender)
 		wfc.version[sender] = version or "-"
 
 		if isdead == "1" then
-			wfcBgFrame:partyPlayerDead(playerIndex)
+			wfcShamanFrame:partyPlayerDead(playerIndex)
 		elseif spellName ~= nil then -- update buffs
 			local _, _, lagHome, _ = GetNetStats()
 			local remain = (expiration - (lag + lagHome)) / 1000
-			wfcBgFrame:startTimerButton(gGUID, remain, wfc.icons[gGUID])
+			wfcShamanFrame:startTimerButton(gGUID, remain, wfc.icons[gGUID])
 		else -- addon installed or buff expired
-			wfcBgFrame:showWarning(playerIndex, combat)
+			wfcShamanFrame:showWarning(playerIndex, combat)
 		end
 	end
 end
@@ -149,8 +149,8 @@ function wfc:ADDON_LOADED()
 		yspace = 0,
 		xspace = 1,
 	}
-	wfcBgFrame:initFrames() -- initiate frames early
-	wfcBgFrame:modLayout()
+	wfcShamanFrame:initFrames() -- initiate frames early
+	wfcShamanFrame:modLayout()
 end
 
 function wfc:ENCOUNTER_START(encounterId, encounterName)
@@ -177,23 +177,23 @@ local function wfSlashCommands(entry)
 		if arg2 == "horizontal" then
 			wfcdb.yspace = 0
 			wfcdb.xspace = 1
-			wfcBgFrame:modLayout()
+			wfcShamanFrame:modLayout()
 		elseif arg2 == "vertical" then
 			wfcdb.yspace = 1
 			wfcdb.xspace = 0
-			wfcBgFrame:modLayout()
+			wfcShamanFrame:modLayout()
 		end
 	elseif isShaman and arg1 == "spacing" and tonumber(arg2) then
 		wfcdb.space = tonumber(arg2)
-		wfcBgFrame:modLayout()
+		wfcShamanFrame:modLayout()
 	elseif isShaman and arg1 == "size" and tonumber(arg2) then
 		-- If not handled above, display some sort of help message
 		wfcdb.size = tonumber(arg2)
-		wfcBgFrame:modLayout()
+		wfcShamanFrame:modLayout()
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
 		-- If not handled above, display some sort of help message
 		wfcdb.warnsize = tonumber(arg2)
-		wfcBgFrame:modLayout()
+		wfcShamanFrame:modLayout()
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
@@ -214,14 +214,14 @@ local function wfSlashCommands(entry)
 		end
 	elseif arg1 == "show" then
 		if isShaman then
-			wfcBgFrame:Show()
+			wfcShamanFrame:Show()
 			for i = 0, 3 do
 				wfc.buttons[i]:Show()
 			end
 		end
 	elseif arg1 == "hide" then
 		if isShaman then
-			wfcBgFrame:Hide()
+			wfcShamanFrame:Hide()
 			for i = 0, 3 do
 				wfc.buttons[i]:Hide()
 			end

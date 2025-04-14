@@ -1,4 +1,4 @@
-wfcBgFrame = CreateFrame("Frame", "wfcBgFrame", UIParent)
+wfcShamanFrame = CreateFrame("Frame", "wfcShamanFrame", UIParent)
 
 local classIcon = {
     ["WARRIOR"] = "Interface\\Icons\\inv_sword_27",
@@ -7,20 +7,20 @@ local classIcon = {
     ["ROGUE"] = "Interface\\Icons\\inv_throwingknife_04",
 }
 
-function wfcBgFrame:initFrames() -- initialize the frames on screen
-    wfcBgFrame:SetPoint("CENTER", UIParent, 0, -225)
-    --wfcBgFrame.texture = wfcBgFrame:CreateTexture(nil, "BACKGROUND")
-    --wfcBgFrame.texture:SetAllPoints()
-    --wfcBgFrame.texture:SetColorTexture(0,0,0,0.3)
-    wfcBgFrame:EnableMouse(true)
-    wfcBgFrame:SetMovable(true)
-    wfcBgFrame:RegisterForDrag("LeftButton")
-    wfcBgFrame:SetScript("OnDragStart", function(self)
+function wfcShamanFrame:initFrames() -- initialize the frames on screen
+    wfcShamanFrame:SetPoint("CENTER", UIParent, 0, -225)
+    --wfcShamanFrame.texture = wfcShamanFrame:CreateTexture(nil, "BACKGROUND")
+    --wfcShamanFrame.texture:SetAllPoints()
+    --wfcShamanFrame.texture:SetColorTexture(0,0,0,0.3)
+    wfcShamanFrame:EnableMouse(true)
+    wfcShamanFrame:SetMovable(true)
+    wfcShamanFrame:RegisterForDrag("LeftButton")
+    wfcShamanFrame:SetScript("OnDragStart", function(self)
         if IsShiftKeyDown() then
-            wfcBgFrame:StartMoving()
+            wfcShamanFrame:StartMoving()
         end
     end)
-    wfcBgFrame:SetScript("OnDragStop", wfcBgFrame.StopMovingOrSizing)
+    wfcShamanFrame:SetScript("OnDragStop", wfcShamanFrame.StopMovingOrSizing)
     for i = 0, 3 do
         wfc.buttons[i] = CreateFrame("FRAME", nil, UIParent)
         wfc.buttons[i].bg = wfc.buttons[i]:CreateTexture(nil, "BACKGROUND")
@@ -37,32 +37,32 @@ function wfcBgFrame:initFrames() -- initialize the frames on screen
         wfc.buttons[i].icon:SetAlpha(0.5)
         wfc.buttons[i]:Hide() -- hide buttons until group is joined
     end
-    wfcBgFrame:Hide() -- hide frame until group is joined
+    wfcShamanFrame:Hide() -- hide frame until group is joined
 end
 
-function wfcBgFrame:modLayout()
+function wfcShamanFrame:modLayout()
     local warnsize = wfcdb.warnsize or 4
     local xsize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.xspace * 3
     local ysize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.yspace * 3
-    wfcBgFrame:SetSize(xsize, ysize)
+    wfcShamanFrame:SetSize(xsize, ysize)
     for i = 0, 3 do
         local xpoint, ypoint =
         i * (wfcdb.size + wfcdb.space) * wfcdb.xspace, i * (wfcdb.size + wfcdb.space) * wfcdb.yspace
-        wfc.buttons[i]:SetPoint("TOPLEFT", wfcBgFrame, "TOPLEFT", xpoint, ypoint)
+        wfc.buttons[i]:SetPoint("TOPLEFT", wfcShamanFrame, "TOPLEFT", xpoint, ypoint)
         wfc.buttons[i]:SetSize(wfcdb.size, wfcdb.size)
         wfc.buttons[i].name:SetPoint("CENTER", wfc.buttons[i], "TOP", 0, 5)
         wfc.buttons[i].bg:SetSize(wfcdb.size + warnsize * 2, wfcdb.size + warnsize * 2)
-        wfc.buttons[i].bg:SetPoint("TOPLEFT", wfcBgFrame, "TOPLEFT", xpoint - warnsize, -ypoint + warnsize)
+        wfc.buttons[i].bg:SetPoint("TOPLEFT", wfcShamanFrame, "TOPLEFT", xpoint - warnsize, -ypoint + warnsize)
         wfc.buttons[i].icon:SetSize(wfcdb.size, wfcdb.size)
-        wfc.buttons[i].icon:SetPoint("TOPLEFT", wfcBgFrame, "TOPLEFT", xpoint, -ypoint)
+        wfc.buttons[i].icon:SetPoint("TOPLEFT", wfcShamanFrame, "TOPLEFT", xpoint, -ypoint)
         if warnsize == 0 then
             wfc.buttons[i].bg:Hide()
         end
     end
 end
 
-function wfcBgFrame:collectGroupInfo()
-    wfcBgFrame:Show() -- group joined, show frame
+function wfcShamanFrame:collectGroupInfo()
+    wfcShamanFrame:Show() -- group joined, show frame
     wipe(wfc.ixs)
     wipe(wfc.version)
     local j = -1
@@ -85,7 +85,7 @@ function wfcBgFrame:collectGroupInfo()
     j = nil
 end
 
-function wfcBgFrame:resetGroup()
+function wfcShamanFrame:resetGroup()
     for j = 0, 3 do
         wfc.buttons[j].name:SetText("")
         wfc.buttons[j].cd:SetCooldown(0, 0)
@@ -95,10 +95,10 @@ function wfcBgFrame:resetGroup()
         wfc.buttons[j].bg:Hide()
         wfc.buttons[j]:Hide() -- group reset, hide buttons
     end
-    wfcBgFrame:Hide() -- group reset, hide frame
+    wfcShamanFrame:Hide() -- group reset, hide frame
 end
 
-function wfcBgFrame:startTimerButton(gGUID, remain, icon)
+function wfcShamanFrame:startTimerButton(gGUID, remain, icon)
     if remain > 0 and wfc.ixs[gGUID] then
         local j = wfc.ixs[gGUID]
         wfc.buttons[j].icon:SetDesaturated(nil)
@@ -109,7 +109,7 @@ function wfcBgFrame:startTimerButton(gGUID, remain, icon)
     end
 end
 
-function wfcBgFrame:setBlockerButton(gGUID, remain, spellID)
+function wfcShamanFrame:setBlockerButton(gGUID, remain, spellID)
     _, _, icon, _, _, _, _ = GetSpellInfo(spellID)
     if remain > 0 and wfc.ixs[gGUID] then
         local j = wfc.ixs[gGUID]
@@ -121,14 +121,14 @@ function wfcBgFrame:setBlockerButton(gGUID, remain, spellID)
     end
 end
 
-function wfcBgFrame:partyPlayerDead(playerIndex)
+function wfcShamanFrame:partyPlayerDead(playerIndex)
     wfc.buttons[playerIndex].icon:SetAlpha(1)
     wfc.buttons[playerIndex].icon:SetDesaturated(1)
     wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
     wfc.buttons[playerIndex].bg:SetAlpha(0)
 end
 
-function wfcBgFrame:showWarning(playerIndex, combat)
+function wfcShamanFrame:showWarning(playerIndex, combat)
     wfc.buttons[playerIndex].icon:SetAlpha(1)
     wfc.buttons[playerIndex].icon:SetDesaturated(1)
     wfc.buttons[playerIndex].cd:SetCooldown(0, 0)
