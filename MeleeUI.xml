@@ -1,0 +1,162 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\..\FrameXML\UI.xsd">
+
+    <FontFamily name="WfcNormalFont" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Fonts\FRIZQT__.TTF" height="11"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.TTF" height="12" spacing="1"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="12"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\bKAI00M.TTF" height="12"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="11"/>
+        </Member>
+    </FontFamily>
+
+    <FontFamily name="WfcSmallFont" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Fonts\FRIZQT__.TTF" height="9"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.TTF" height="10" spacing="1"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="10"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\bKAI00M.TTF" height="10"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+
+    <Frame name="wfcMeleeFrame" parent="UIParent" frameStrata="HIGH" enableMouse="true" movable="true" inherits="BackdropTemplate">
+        <Size x="120" y="160" />
+        <Anchors>
+            <Anchor point="CENTER" />
+        </Anchors>
+        <ResizeBounds>
+            <minResize x="300" y="200" />
+            <maxResize x="600" y="800" />
+        </ResizeBounds>
+        <Scripts>
+            <OnLoad>
+                self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
+   			    self:SetBackdropColor (0.1, 0.1, 0.1, 0.7)
+    		    self:SetBackdropBorderColor(0, 0, 0, 0.9)
+                self:Hide()
+            </OnLoad>
+        </Scripts>
+
+        <Frames>
+
+            <Button name="$parent_SessionButton">
+                <Size x="26" y="26" />
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset x="4" y="1" />
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self.icon = self:CreateTexture(nil, "ARTWORK")
+                        self.icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01") -- Replace with your icon path
+                        self.icon:SetSize(15, 15)
+                        self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
+                    </OnLoad>
+                    <OnClick>
+                        self:toggleSessionView()
+                    </OnClick>
+                </Scripts>
+            </Button>            <!--$parent_CloseButton-->
+
+            <Button name="$parent_CloseButton" inherits="UIPanelCloseButton">
+                <Size x="26" y="26" />
+                <Anchors>
+                    <Anchor point="TOPRIGHT">
+                        <Offset x="1" y="1" />
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        wfcMeleeFrame:Hide()
+                        wfcdb.meleeShown = false
+                    </OnClick>
+                </Scripts>
+            </Button>            <!--$parent_CloseButton-->
+
+            <Frame name="$parent_Title" enableMouse="true" movable="true" resizable="true" inherits="BackdropTemplate">
+                <Size x="120" y="20" />
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="2" y="-2"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-2" y="-2"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:RegisterForDrag("LeftButton")
+                    </OnLoad>
+                    <OnDragStart>
+                        wfcMeleeFrame:StartMoving()
+                    </OnDragStart>
+                    <OnDragStop>
+                        wfcMeleeFrame:StopMovingOrSizing();
+                    </OnDragStop>
+                </Scripts>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <FontString name="$parent_Text" inherits="WfcNormalFont" text="Totems">
+                            <Color r="0.3" g="0.7" b="1"/>
+                            <Anchors>
+                                <Anchor point="CENTER" />
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>            <!--$parent_Title-->
+
+            <Frame name="$parent_Header" frameStrata="HIGH" inherits="BackdropTemplate">
+                <Size x="120" y="60" />
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="2" y="-2"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-2" y="-2"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <FontString name="$parent_Text" inherits="WfcSmallFont" text="Current Fight">
+                            <Color r="1" g="0.9" b="0.2"/>
+                            <Anchors>
+                                <Anchor point="CENTER" />
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>            <!--$parent_Header-->
+
+        </Frames>
+    </Frame>    <!--RaidLogger_RaidWindow-->
+
+    <Script File="MeleeUI.lua"/>
+</Ui>

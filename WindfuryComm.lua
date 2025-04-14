@@ -47,42 +47,6 @@ local function uptimePercent(uptime)
 	return color..tostring(uptime)..'%|r'
 end
 
-local function registerUptimeReport()
-	if wfcLib then
-		local db = wfcdb
-		wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-			if combatTime > 1 and (encounter or db and db.alwaysReport) then
-				local wfUP = math.floor(wfTime / combatTime * 100)
-				local msg
-				if encounter and (not encounter.finish or GetTime() - encounter.finish < 5) then
-					msg = 'Encounter |cff00ff00'..encounter.name..'|r ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
-				else
-					msg = 'Combat ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
-				end
-				if strTime > 0 then
-					msg = msg..' |cffff8800STR|r:'..uptimePercent(math.floor(strTime / combatTime * 100))
-				end
-				if agiTime > 0 then
-					msg = msg..' |cffff8800AGI|r:'..uptimePercent(math.floor(agiTime / combatTime * 100))
-				end
-				if frTime > 0 then
-					msg = msg..' |cffff8800FR|r:'..uptimePercent(math.floor(frTime / combatTime * 100))
-				end
-				if frrTime > 0 then
-					msg = msg..' |cffff8800FrR|r:'..uptimePercent(math.floor(frrTime / combatTime * 100))
-				end
-				if gndTime > 0 then
-					msg = msg..' |cffff8800GND|r:'..uptimePercent(math.floor(gndTime / combatTime * 100))
-				end
-				out(msg..' by |cff0070DE'..tostring(shaman or '??'))
-				encounter = nil
-			end
-		end
-	else
-		out("LibWFcomm not found!!")
-	end
-end
-
 function wfc:GROUP_ROSTER_UPDATE()
 	if GetNumGroupMembers() == 0 then
 		wfcShamanFrame:resetGroup()
@@ -132,8 +96,12 @@ function wfc:ADDON_LOADED()
 		yspace = 0,
 		xspace = 1,
 	}
-	wfcShamanFrame:initFrames() -- initiate frames early
-	wfcShamanFrame:modLayout()
+	if isShaman then
+		wfcShamanFrame:initFrames() -- initiate frames early
+		wfcShamanFrame:modLayout()
+	elseif isMelee then
+		wfcMeleeFrame:init(wfcLib)
+	end
 end
 
 function wfc:ENCOUNTER_START(encounterId, encounterName)
@@ -235,7 +203,9 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 			return wfc[event](self, event, ...)
 		end
 	elseif isMelee then
-		if event == "ENCOUNTER_START" then
+		if event == "ADDON_LOADED" then
+			wfc:ADDON_LOADED(...)
+		elseif event == "ENCOUNTER_START" then
 			wfc:ENCOUNTER_START(...)
 		elseif event == "ENCOUNTER_END" then
 			wfc:ENCOUNTER_END(...)
@@ -245,7 +215,3 @@ end)
 
 SLASH_WFC1 = "/wfc"
 SlashCmdList["WFC"] = wfSlashCommands
-
-if isMelee then
-	C_Timer.After(2, function() registerUptimeReport() end)
-end

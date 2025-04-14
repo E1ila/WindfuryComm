@@ -10,4 +10,5 @@ libs\LibWFcomm\LibWFcomm.xml
 #@end-no-lib-strip@
 
 ShamanUI.lua
+MeleeUI.xml
 WindfuryComm.lua
