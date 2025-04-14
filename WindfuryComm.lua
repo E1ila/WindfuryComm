@@ -33,28 +33,18 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
-local function uptimePercent(uptime)
-	local color = '|cffff0000'
-	if uptime > 90 then
-		color = '|cff00ff00'
-	elseif uptime > 80 then
-		color = '|cffb9f542'
-	elseif uptime > 60 then
-		color = '|cfff5ef42'
-	elseif uptime > 40 then
-		color = '|cfff5a142'
-	end
-	return color..tostring(uptime)..'%|r'
-end
-
-function wfc:GROUP_ROSTER_UPDATE()
+function wfc:GROUP_ROSTER_UPDATE(...)
 	if GetNumGroupMembers() == 0 then
 		wfcShamanFrame:resetGroup()
 	else
-		wfcShamanFrame:updateCurrentTimers()
-		wfcShamanFrame:resetGroup()
-		wfcShamanFrame:collectGroupInfo()
-		wfcShamanFrame:restartCurrentTimers()
+		local partySig = wfcShamanFrame.getPartySig()
+		if partySig ~= wfcShamanFrame.partySig then
+			wfcShamanFrame:updateCurrentTimers()
+			wfcShamanFrame:resetGroup()
+			wfcShamanFrame:collectGroupInfo()
+			wfcShamanFrame:restartCurrentTimers()
+			wfcShamanFrame.partySig = partySig
+		end
 	end
 end
 

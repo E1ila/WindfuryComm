@@ -1,3 +1,17 @@
+local function uptimePercent(uptime)
+    local color = '|cffff0000'
+    if uptime > 90 then
+        color = '|cff00ff00'
+    elseif uptime > 80 then
+        color = '|cffb9f542'
+    elseif uptime > 60 then
+        color = '|cfff5ef42'
+    elseif uptime > 40 then
+        color = '|cfff5a142'
+    end
+    return color..tostring(uptime)..'%|r'
+end
+
 local function registerUptimeReport(wfcLib)
     if wfcLib then
         local db = wfcdb
@@ -48,8 +62,7 @@ function wfcMeleeFrame:updateSessionViewText()
 end
 
 function wfcMeleeFrame:init(wfcLib)
-    registerUptimeReport()
     self:updateSessionViewText()
     self:Show()
-    C_Timer.After(2, function() registerUptimeReport(wfcLib) end)
+    registerUptimeReport(wfcLib)
 end

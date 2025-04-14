@@ -37,7 +37,7 @@
         </Member>
     </FontFamily>
 
-    <Frame name="wfcMeleeFrame" parent="UIParent" frameStrata="HIGH" enableMouse="true" movable="true" inherits="BackdropTemplate">
+    <Frame name="wfcMeleeFrame" parent="UIParent" frameStrata="MEDIUM" enableMouse="true" movable="true" inherits="BackdropTemplate">
         <Size x="120" y="160" />
         <Anchors>
             <Anchor point="CENTER" />
@@ -49,7 +49,7 @@
         <Scripts>
             <OnLoad>
                 self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
-   			    self:SetBackdropColor (0.1, 0.1, 0.1, 0.7)
+   			    self:SetBackdropColor (0.1, 0.1, 0.1, 0.5)
     		    self:SetBackdropBorderColor(0, 0, 0, 0.9)
                 self:Hide()
             </OnLoad>
@@ -130,7 +130,7 @@
             </Frame>            <!--$parent_Title-->
 
             <Frame name="$parent_Header" frameStrata="HIGH" inherits="BackdropTemplate">
-                <Size x="120" y="60" />
+                <Size x="120" y="56" />
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
                         <Offset>
@@ -154,6 +154,44 @@
                     </Layer>
                 </Layers>
             </Frame>            <!--$parent_Header-->
+
+            <Frame name="$parent_Totem1" inherits="BackdropTemplate">
+                <Size y="30" />
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent">
+                        <Offset x="3" y="-40" />
+                    </Anchor>
+                    <Anchor point="TOPRIGHT" relativeTo="$parent">
+                        <Offset x="-3" y="-40" />
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:SetBackdrop ({bgFile = [[Interface\AddOns\RaidLogger\assets\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
+                        self:SetBackdropColor(0, 0, 0, 0.5)
+                        self:SetBackdropBorderColor(0, 0, 0, 0)
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <!-- create icon -->
+                    <Button name="$parent_Icon">
+                        <Size x="28" y="28" />
+                        <Anchors>
+                            <Anchor point="TOPLEFT">
+                                <Offset x="1" y="-1" />
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self.icon = self:CreateTexture(nil, "ARTWORK")
+                                self.icon:SetTexture("Interface\\Icons\\Spell_Nature_Windfury")
+                                self.icon:SetSize(28, 28)
+                                self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
+                            </OnLoad>
+                        </Scripts>
+                    </Button>
+                </Frames>
+            </Frame>            <!--$parent_Buttons-->
 
         </Frames>
     </Frame>    <!--RaidLogger_RaidWindow-->

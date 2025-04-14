@@ -63,6 +63,15 @@ function wfcShamanFrame:modLayout()
     end
 end
 
+function wfcShamanFrame:getPartySig()
+    local sig = ""
+    for index = 1, 4 do
+        local pstring = "party" .. index
+        sig = sig..UnitGUID(pstring)
+    end
+    return sig
+end
+
 function wfcShamanFrame:collectGroupInfo()
     self:Show() -- group joined, show frame
     wipe(self.ixs)
