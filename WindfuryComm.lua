@@ -12,12 +12,8 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
-local encounter
 
 local wfcLib = LibStub("LibWFcomm")
-
-local COMM_PREFIX = "WF_STATUS"
-C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
 local function out(text, ...)
 	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)

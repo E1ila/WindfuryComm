@@ -2,6 +2,9 @@ wfcShamanFrame = CreateFrame("Frame", "wfcShamanFrame", UIParent)
 wfcShamanFrame.icons, wfcShamanFrame.guids, wfcShamanFrame.currentTimers, wfcShamanFrame.buttons = {}, {}, {}, {}
 wfcShamanFrame.ixs, wfcShamanFrame.party, wfcShamanFrame.class = {}, {}, {}
 
+local COMM_PREFIX = "WF_STATUS"
+C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
+
 local classIcon = {
     ["WARRIOR"] = "Interface\\Icons\\inv_sword_27",
     ["PALADIN"] = "Interface\\Icons\\ability_thunderbolt",
