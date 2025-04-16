@@ -27,16 +27,23 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
-function wfc:GROUP_ROSTER_UPDATE()
-	wfcShamanFrame:GROUP_ROSTER_UPDATE()
+function wfc:ShowUI(onload)
+	wfcdbc.shown = true
+	if isShaman then
+		wfcShamanFrame:ShowUI()
+	elseif isMelee and not onload then
+		wfcMeleeFrame:ShowUI()
+	end
 end
 
-function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
-	wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
-end
-
-function wfc:PLAYER_ENTERING_WORLD()
-	wfcShamanFrame:GROUP_ROSTER_UPDATE()
+function wfc:HideUI()
+	wfcdbc.shown = false
+	if isShaman then
+		wfcShamanFrame:HideUI()
+	elseif isMelee then
+		wfcMeleeFrame:HideUI()
+	end
+	out("UI hidden, write |cffff8800/wfc show|r to show it again")
 end
 
 function wfc:ADDON_LOADED()
@@ -47,48 +54,37 @@ function wfc:ADDON_LOADED()
 		yspace = 0,
 		xspace = 1,
 	}
+	wfcdbc = wfcdbc or {
+		shown = true,
+	}
 	if isShaman then
-		wfcShamanFrame:initFrames() -- initiate frames early
-		wfcShamanFrame:modLayout()
+		wfcShamanFrame:Init() -- initiate frames early
 	elseif isMelee then
-		wfcMeleeFrame:init(wfcLib)
+		wfcMeleeFrame:Init(wfcLib)
+	end
+	if wfcdbc.shown == nil or wfcdbc.shown then
+		self:ShowUI(true)
+	else
+		self:HideUI()
 	end
 end
 
 local function wfSlashCommands(entry)
 	local arg1, arg2 = strsplit(" ", entry)
 	if isShaman and arg1 == "orientation" and (arg2 == "horizontal" or arg2 == "vertical") then
-		if arg2 == "horizontal" then
-			wfcdb.yspace = 0
-			wfcdb.xspace = 1
-			wfcShamanFrame:modLayout()
-		elseif arg2 == "vertical" then
-			wfcdb.yspace = 1
-			wfcdb.xspace = 0
-			wfcShamanFrame:modLayout()
-		end
+		wfcShamanFrame:flipLayout()
 	elseif isShaman and arg1 == "spacing" and tonumber(arg2) then
-		wfcdb.space = tonumber(arg2)
-		wfcShamanFrame:modLayout()
+		wfcShamanFrame:setSpacing(arg2)
 	elseif isShaman and arg1 == "size" and tonumber(arg2) then
-		-- If not handled above, display some sort of help message
-		wfcdb.size = tonumber(arg2)
-		wfcShamanFrame:modLayout()
+		wfcShamanFrame:setSize(arg2)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
-		-- If not handled above, display some sort of help message
-		wfcdb.warnsize = tonumber(arg2)
-		wfcShamanFrame:modLayout()
+		wfcShamanFrame:setWarnSize(arg2)
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
-	elseif pClass ~= "SHAMAN" and arg1 == "ar" then
-		if wfcdb.alwaysReport then
-			wfcdb.alwaysReport = false
-			out("Will only report Windfury uptime after boss fights")
-		else
-			wfcdb.alwaysReport = true
-			out("Will report Windfury uptime after each fight")
-		end
+	elseif isMelee and arg1 == "shrink" then
+		wfcdb.shrink = not wfcdb.shrink
+		out("Shrink totem window is now " .. (wfcdb.debug and "enabled" or "disabled"))
 	elseif arg1 == "ver" then
 		for k, v in pairs(wfc.version) do
 			local name = GetUnitName(k)
@@ -97,24 +93,14 @@ local function wfSlashCommands(entry)
 			end
 		end
 	elseif arg1 == "show" then
-		if isShaman then
-			wfcShamanFrame:Show()
-			for i = 0, 3 do
-				wfcShamanFrame.buttons[i]:Show()
-			end
-		end
+		wfc:ShowUI()
 	elseif arg1 == "hide" then
-		if isShaman then
-			wfcShamanFrame:Hide()
-			for i = 0, 3 do
-				wfcShamanFrame.buttons[i]:Hide()
-			end
-		end
+		wfc:HideUI()
 	else
 		out("WindfuryComm++ commands:")
-		if pClass ~= "SHAMAN" then
-			out("/wfc <hide/show> - show or hide party icons")
-			out("/wfc ar - always report wf uptime, after each fight")
+		out("/wfc <hide/show> - show or hide UI")
+		if isMelee then
+			out("/wfc shrink - toggle shrink UI according to totem list")
 		end
 		if isShaman then
 			out("/wfc orientation <horizontal/vertical> - layout of icons")
@@ -131,17 +117,18 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		wfc:ADDON_LOADED(...)
 	end
 	if isShaman then
-		if 	event == "PLAYER_ENTERING_WORLD" or
-			event == "CHAT_MSG_ADDON" or
-			event == "GROUP_ROSTER_UPDATE"
-		then
-			return wfc[event](self, ...)
+		if  event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+			wfcShamanFrame:GROUP_ROSTER_UPDATE()
+		elseif event == "CHAT_MSG_ADDON" then
+			wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
 		end
 	elseif isMelee then
 		if event == "ENCOUNTER_START" then
 			wfcMeleeFrame:ENCOUNTER_START(...)
 		elseif event == "ENCOUNTER_END" then
 			wfcMeleeFrame:ENCOUNTER_END(...)
+		elseif event == "GROUP_ROSTER_UPDATE" then
+			wfcMeleeFrame:GROUP_ROSTER_UPDATE(...)
 		end
 	end
 end)

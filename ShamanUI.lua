@@ -15,7 +15,7 @@ local classIcon = {
 -- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
 local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 
-function wfcShamanFrame:initFrames() -- initialize the frames on screen
+function wfcShamanFrame:Init() -- initialize the frames on screen
     self:SetPoint("CENTER", UIParent, 0, -225)
     --wfcShamanFrame.texture = wfcShamanFrame:CreateTexture(nil, "BACKGROUND")
     --wfcShamanFrame.texture:SetAllPoints()
@@ -46,6 +46,7 @@ function wfcShamanFrame:initFrames() -- initialize the frames on screen
         self.buttons[i]:Hide() -- hide buttons until group is joined
     end
     self:Hide() -- hide frame until group is joined
+    self:modLayout()
 end
 
 function wfcShamanFrame:modLayout()
@@ -66,6 +67,33 @@ function wfcShamanFrame:modLayout()
         if warnsize == 0 then
             self.buttons[i].bg:Hide()
         end
+    end
+end
+
+function wfcShamanFrame:setSpacing(x)
+    wfcdb.space = tonumber(x)
+    self:modLayout()
+end
+
+function wfcShamanFrame:setSize(x)
+    wfcdb.size = tonumber(x)
+    self:modLayout()
+end
+
+function wfcShamanFrame:setWarnSize(x)
+    wfcdb.warnsize = tonumber(arg2)
+    self:modLayout()
+end
+
+function wfcShamanFrame:flipLayout()
+    if arg2 == "horizontal" then
+        wfcdb.yspace = 0
+        wfcdb.xspace = 1
+        self:modLayout()
+    elseif arg2 == "vertical" then
+        wfcdb.yspace = 1
+        wfcdb.xspace = 0
+        self:modLayout()
     end
 end
 
@@ -222,5 +250,19 @@ function wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
         else -- addon installed or buff expired
             self:showWarning(playerIndex, combat)
         end
+    end
+end
+
+function wfcShamanFrame:ShowUI()
+    self:Show()
+    for i = 0, 3 do
+        self.buttons[i]:Show()
+    end
+end
+
+function wfcShamanFrame:HideUI()
+    self:Hide()
+    for i = 0, 3 do
+        self.buttons[i]:Hide()
     end
 end

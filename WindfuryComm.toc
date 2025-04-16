@@ -2,6 +2,7 @@
 ## Title: WindfuryComm
 ## Author: Yotta, Kof
 ## SavedVariables: wfcdb
+## SavedVariablesPerCharacter: wfcdbc
 ## v1.4.8
 
 #@no-lib-strip@

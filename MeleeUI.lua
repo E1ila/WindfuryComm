@@ -72,12 +72,15 @@ function wfcMeleeFrame:showTotems(totemUptimes)
             frames.root:Hide()
         end
     end
-    wfcMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
+    if wfcdb.shrink then
+        wfcMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
+    end
 end
 
 local function registerUptimeReport(wfcLib)
     if wfcLib then
         wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
+            if not wfcdbc.shown then return end
             local totemUptimes = {}
             if combatTime > 1 then
                 local wfUp = math.floor(wfTime / combatTime * 100)
@@ -104,6 +107,7 @@ local function registerUptimeReport(wfcLib)
             wfcMeleeFrame:showTotems(totemUptimes)
             wfcMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
             wfcMeleeFrame:updateSessionViewText(combatTime)
+            wfcMeleeFrame:Show()
         end
     else
         print("LibWFcomm not found!!")
@@ -155,11 +159,19 @@ function wfcMeleeFrame:addTotemRow()
     textElement:SetText("--")
 end
 
-function wfcMeleeFrame:init(wfcLib)
+function wfcMeleeFrame:ShowUI()
+    wfcMeleeFrame:Show()
+end
+
+function wfcMeleeFrame:HideUI()
+    wfcMeleeFrame:Hide()
+end
+
+function wfcMeleeFrame:Init(wfcLib)
     self:updateSessionViewText()
     self:addTotemRow()
     self:addTotemRow()
-    self:Show()
+    self:Hide()
     registerUptimeReport(wfcLib)
 end
 
@@ -178,5 +190,11 @@ function wfcMeleeFrame:ENCOUNTER_END(encounterId)
         if encounterId == encounter.id then
             encounter.finish = GetTime()
         end
+    end
+end
+
+function wfcMeleeFrame:GROUP_ROSTER_UPDATE()
+    if GetNumGroupMembers() == 0 then
+        self:HideUI()
     end
 end

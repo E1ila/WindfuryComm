@@ -146,8 +146,7 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        wfcMeleeFrame:Hide()
-                        wfcdb.meleeShown = false
+                        wfc:HideUI()
                     </OnClick>
                 </Scripts>
             </Button>            <!--$parent_CloseButton-->
