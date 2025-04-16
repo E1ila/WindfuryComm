@@ -15,6 +15,18 @@ local classIcon = {
 -- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
 local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 
+local function getPartySig()
+    local sig = ""
+    for index = 1, 4 do
+        local pstring = "party" .. index
+        local guid = UnitGUID(pstring)
+        if guid then
+            sig = sig..UnitGUID(pstring)
+        end
+    end
+    return sig
+end
+
 function WFCShamanFrame:Init() -- initialize the frames on screen
     self:SetPoint("CENTER", UIParent, 0, -225)
     --WFCShamanFrame.texture = WFCShamanFrame:CreateTexture(nil, "BACKGROUND")
@@ -95,18 +107,6 @@ function WFCShamanFrame:FlipLayout()
         wfcdb.xspace = 0
         self:ModLayout()
     end
-end
-
-local function getPartySig()
-    local sig = ""
-    for index = 1, 4 do
-        local pstring = "party" .. index
-        local guid = UnitGUID(pstring)
-        if guid then
-            sig = sig..UnitGUID(pstring)
-        end
-    end
-    return sig
 end
 
 function WFCShamanFrame:CollectGroupInfo()
@@ -212,6 +212,22 @@ function WFCShamanFrame:RestartCurrentTimers()
     wipe(self.currentTimers)
 end
 
+function WFCShamanFrame:ShowUI()
+    self:Show()
+    for i = 0, 3 do
+        self.buttons[i]:Show()
+    end
+end
+
+function WFCShamanFrame:HideUI()
+    self:Hide()
+    for i = 0, 3 do
+        self.buttons[i]:Hide()
+    end
+end
+
+-- Event Handlers ------------------------------------------------------
+
 function WFCShamanFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
         self:ResetGroup()
@@ -250,19 +266,5 @@ function WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
         else -- addon installed or buff expired
             self:ShowWarning(playerIndex, combat)
         end
-    end
-end
-
-function WFCShamanFrame:ShowUI()
-    self:Show()
-    for i = 0, 3 do
-        self.buttons[i]:Show()
-    end
-end
-
-function WFCShamanFrame:HideUI()
-    self:Hide()
-    for i = 0, 3 do
-        self.buttons[i]:Hide()
     end
 end

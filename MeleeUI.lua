@@ -20,6 +20,10 @@ local ICONS = {
 local totemFrames = {}
 local rowHeight = 28
 local encounter
+local stats = {
+    overall = {},
+    last = {},
+}
 
 local function uptimeText(uptime)
     local color = '|cffff0000'
@@ -52,6 +56,37 @@ local function uptimeColor(uptime)
     return color, bgcolor
 end
 
+local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
+    if wfcdbc and not wfcdbc.shown then return end
+    local totemUptimes = {}
+    if combatTime > 1 then
+        local wfUp = math.floor(wfTime / combatTime * 100)
+        local strUp = math.floor(strTime / combatTime * 100)
+        local agiUp = math.floor(agiTime / combatTime * 100)
+        local frrUp = math.floor(frrTime / combatTime * 100)
+        local frUp = math.floor(frTime / combatTime * 100)
+        local gndUp = math.floor(gndTime / combatTime * 100)
+        table.insert(totemUptimes, { "wf", wfUp })
+        table.insert(totemUptimes, { "str", strUp })
+        if agiUp > 0 then
+            table.insert(totemUptimes, { "agi", agiUp })
+        end
+        if gndUp > 0 then
+            table.insert(totemUptimes, { "gnd", gndUp })
+        end
+        if frUp > 0 then
+            table.insert(totemUptimes, { "fr", frUp })
+        end
+        if frrUp > 0 then
+            table.insert(totemUptimes, { "frr", frrUp })
+        end
+    end
+    WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
+    WFCMeleeFrame:ShowTotems(totemUptimes)
+    WFCMeleeFrame:UpdateSessionViewText(combatTime)
+    WFCMeleeFrame:Show()
+end
+
 function WFCMeleeFrame:ShowTotems(totemUptimes)
     for i = 1, #totemUptimes do
         local totemName, uptime = totemUptimes[i][1], totemUptimes[i][2]
@@ -75,43 +110,6 @@ function WFCMeleeFrame:ShowTotems(totemUptimes)
     end
     if wfcdb.shrink then
         WFCMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
-    end
-end
-
-local function registerUptimeReport(wfcLib)
-    if wfcLib then
-        wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-            if not wfcdbc.shown then return end
-            local totemUptimes = {}
-            if combatTime > 1 then
-                local wfUp = math.floor(wfTime / combatTime * 100)
-                local strUp = math.floor(strTime / combatTime * 100)
-                local agiUp = math.floor(agiTime / combatTime * 100)
-                local frrUp = math.floor(frrTime / combatTime * 100)
-                local frUp = math.floor(frTime / combatTime * 100)
-                local gndUp = math.floor(gndTime / combatTime * 100)
-                table.insert(totemUptimes, { "wf", wfUp })
-                table.insert(totemUptimes, { "str", strUp })
-                if agiUp > 0 then
-                    table.insert(totemUptimes, { "agi", agiUp })
-                end
-                if gndUp > 0 then
-                    table.insert(totemUptimes, { "gnd", gndUp })
-                end
-                if frUp > 0 then
-                    table.insert(totemUptimes, { "fr", frUp })
-                end
-                if frrUp > 0 then
-                    table.insert(totemUptimes, { "frr", frrUp })
-                end
-            end
-            WFCMeleeFrame:ShowTotems(totemUptimes)
-            WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
-            WFCMeleeFrame:UpdateSessionViewText(combatTime)
-            WFCMeleeFrame:Show()
-        end
-    else
-        print("LibWFcomm not found!!")
     end
 end
 
@@ -168,13 +166,23 @@ function WFCMeleeFrame:HideUI()
     WFCMeleeFrame:Hide()
 end
 
+function WFCMeleeFrame:RegisterUptimeReport(wfcLib)
+    if wfcLib then
+        wfcLib.UptimeReportHook = uptimeReport
+    else
+        wfc.out("LibWFcomm not found!")
+    end
+end
+
 function WFCMeleeFrame:Init(wfcLib)
     self:UpdateSessionViewText()
     self:AddTotemRow()
     self:AddTotemRow()
-    self:Hide()
-    registerUptimeReport(wfcLib)
+    self:Hide() -- shows only when receiving uptime report
+    self:RegisterUptimeReport(wfcLib)
 end
+
+-- Event Handlers ------------------------------------------------------
 
 function WFCMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
     wfc.debug("ENCOUNTER_START", encounterId, encounterName)
