@@ -16,6 +16,14 @@ local ICONS = {
     frr = "Interface\\ICONS\\Spell_FrostResistanceTotem_01",
     gnd = "Interface\\ICONS\\Spell_Nature_GroundingTotem",
 }
+local TOTEMS = {
+    [1] = "wf",
+    [2] = "str",
+    [3] = "agi",
+    [4] = "fr",
+    [5] = "frr",
+    [6] = "gnd",
+}
 
 local totemFrames = {}
 local rowHeight = 28
@@ -23,6 +31,7 @@ local encounter
 local stats = {
     overall = {},
     last = {},
+    shaman = nil,
 }
 
 local function uptimeText(uptime)
@@ -41,6 +50,7 @@ end
 
 local function uptimeColor(uptime)
     local color, bgcolor = nil, COLOR_NONE
+    uptime = uptime or 0
     if uptime > 90 then
         color = COLOR_GOOD
     elseif uptime > 80 then
@@ -58,68 +68,74 @@ end
 
 local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
     if wfcdbc and not wfcdbc.shown then return end
-    local totemUptimes = {}
+    if stats.shaman ~= shaman then
+        stats.shaman = shaman
+    end
     if combatTime > 1 then
-        local wfUp = math.floor(wfTime / combatTime * 100)
-        local strUp = math.floor(strTime / combatTime * 100)
-        local agiUp = math.floor(agiTime / combatTime * 100)
-        local frrUp = math.floor(frrTime / combatTime * 100)
-        local frUp = math.floor(frTime / combatTime * 100)
-        local gndUp = math.floor(gndTime / combatTime * 100)
-        table.insert(totemUptimes, { "wf", wfUp })
-        table.insert(totemUptimes, { "str", strUp })
-        if agiUp > 0 then
-            table.insert(totemUptimes, { "agi", agiUp })
-        end
-        if gndUp > 0 then
-            table.insert(totemUptimes, { "gnd", gndUp })
-        end
-        if frUp > 0 then
-            table.insert(totemUptimes, { "fr", frUp })
-        end
-        if frrUp > 0 then
-            table.insert(totemUptimes, { "frr", frrUp })
-        end
+        stats.last.time = (stats.last.time or 0) + combatTime
+        stats.last.wf = math.floor(wfTime / combatTime * 100)
+        stats.last.str = math.floor(strTime / combatTime * 100)
+        stats.last.agi = math.floor(agiTime / combatTime * 100)
+        stats.last.frr = math.floor(frrTime / combatTime * 100)
+        stats.last.fr = math.floor(frTime / combatTime * 100)
+        stats.last.gnd = math.floor(gndTime / combatTime * 100)
+        stats.overall.time = (stats.overall.time or 0) + combatTime
+        stats.overall.wf = (stats.overall.wf or 0) + stats.last.wf
+        stats.overall.str = (stats.overall.str or 0) + stats.last.str
+        stats.overall.agi = (stats.overall.agi or 0) + stats.last.agi
+        stats.overall.gnd = (stats.overall.gnd or 0) + stats.last.gnd
+        stats.overall.fr = (stats.overall.fr or 0) + stats.last.fr
+        stats.overall.frr = (stats.overall.frr or 0) + stats.last.frr
     end
     WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
-    WFCMeleeFrame:ShowTotems(totemUptimes)
-    WFCMeleeFrame:UpdateSessionViewText(combatTime)
+    WFCMeleeFrame:UpdateTotemStats()
     WFCMeleeFrame:Show()
 end
 
-function WFCMeleeFrame:ShowTotems(totemUptimes)
-    for i = 1, #totemUptimes do
-        local totemName, uptime = totemUptimes[i][1], totemUptimes[i][2]
-        if totemFrames[i] == nil then
-            self:AddTotemRow()
+function WFCMeleeFrame:UpdateTotemStats()
+    local lookup = wfcdb.meleeCurrentSession and stats.last or stats.overall
+    local frameIndex = 0
+    for i = 1, #TOTEMS do
+        local totemName = TOTEMS[i]
+        local totemUptime = lookup[totemName] or 0
+        if i <= 2 or totemUptime > 0 then
+            frameIndex = frameIndex + 1
+            if totemFrames[frameIndex] == nil then
+                self:AddTotemRow()
+            end
+            local frames = totemFrames[frameIndex]
+            local color, bgcolor = uptimeColor(totemUptime)
+            frames.root:Show()
+            frames.bar:SetValue(totemUptime)
+            frames.bar:SetStatusBarColor(unpack(color))
+            frames.icon.icon:SetTexture(ICONS[totemName])
+            frames.root:SetBackdropColor(unpack(bgcolor))
+            frames.text:SetText(uptimeText(totemUptime))
         end
+    end
+    for i = frameIndex+1, #totemFrames do
         local frames = totemFrames[i]
-        local color, bgcolor = uptimeColor(uptime)
-        frames.root:Show()
-        frames.bar:SetValue(uptime)
-        frames.bar:SetStatusBarColor(unpack(color))
-        frames.icon.icon:SetTexture(ICONS[totemName])
-        frames.root:SetBackdropColor(unpack(bgcolor))
-        frames.text:SetText(uptimeText(uptime))
+        frames.root:Hide()
     end
-    if #totemFrames > #totemUptimes then
-        for i = #totemUptimes+1, #totemFrames do
-            local frames = totemFrames[i]
-            frames.root:Hide()
-        end
-    end
-    if wfcdb.shrink then
-        WFCMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
-    end
+    WFCMeleeFrame:SetHeight(frameIndex * rowHeight + 40)
+    WFCMeleeFrame:UpdateSessionViewText()
 end
 
 function WFCMeleeFrame_SessionButton:ToggleSessionView()
     wfcdb.meleeCurrentSession = not wfcdb.meleeCurrentSession
-    WFCMeleeFrame:UpdateSessionViewText()
+    WFCMeleeFrame:UpdateTotemStats()
 end
 
-function WFCMeleeFrame:UpdateSessionViewText(time)
+function WFCMeleeFrame:ResetStats()
+    stats.overall = {}
+    stats.last = {}
+    stats.shaman = nil
+    WFCMeleeFrame:UpdateTotemStats()
+end
+
+function WFCMeleeFrame:UpdateSessionViewText()
     local textstr = ""
+    local time = wfcdb.meleeCurrentSession and stats.last.time or stats.overall.time
     if time and time > 0 then
         local minutes = math.floor(time / 60)
         local seconds = time - (minutes * 60)

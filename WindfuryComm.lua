@@ -79,12 +79,11 @@ local function WFCSlashCommands(entry)
 		WFCShamanFrame:SetSize(arg2)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
 		WFCShamanFrame:SetWarnSize(arg2)
+	elseif isMelee and arg1 == "reset" then
+		WFCMeleeFrame:ResetStats()
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
-	elseif isMelee and arg1 == "shrink" then
-		wfcdb.shrink = not wfcdb.shrink
-		out("Shrink totem window is now " .. (wfcdb.debug and "enabled" or "disabled"))
 	elseif arg1 == "ver" then
 		for k, v in pairs(wfc.version) do
 			local name = GetUnitName(k)
@@ -100,7 +99,7 @@ local function WFCSlashCommands(entry)
 		out("WindfuryComm++ commands:")
 		out("/wfc <hide/show> - show or hide UI")
 		if isMelee then
-			out("/wfc shrink - toggle shrink UI according to totem list")
+			out("/wfc reset - reset stats")
 		end
 		if isShaman then
 			out("/wfc orientation <horizontal/vertical> - layout of icons")

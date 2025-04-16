@@ -132,7 +132,7 @@
                         self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
                     </OnLoad>
                     <OnClick>
-                        self:toggleSessionView()
+                        self:ToggleSessionView()
                     </OnClick>
                 </Scripts>
             </Button>            <!--$parent_CloseButton-->
