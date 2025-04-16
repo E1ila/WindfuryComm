@@ -76,7 +76,7 @@ local function WFCSlashCommands(entry)
 	elseif isShaman and arg1 == "spacing" and tonumber(arg2) then
 		WFCShamanFrame:SetSpacing(arg2)
 	elseif isShaman and arg1 == "size" and tonumber(arg2) then
-		WFCShamanFrame:SetSize(arg2)
+		WFCShamanFrame:SetScale(arg2)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
 		WFCShamanFrame:SetWarnSize(arg2)
 	elseif isMelee and arg1 == "reset" then
@@ -117,9 +117,9 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	end
 	if isShaman then
 		if  event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
-			WFCShamanFrame:GROUP_ROSTER_UPDATE()
+			WFCShamanFrame:GROUP_ROSTER_UPDATE(...)
 		elseif event == "CHAT_MSG_ADDON" then
-			WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
+			WFCShamanFrame:CHAT_MSG_ADDON(...)
 		end
 	elseif isMelee then
 		if event == "ENCOUNTER_START" then

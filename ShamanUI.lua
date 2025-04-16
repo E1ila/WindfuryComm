@@ -62,19 +62,19 @@ function WFCShamanFrame:Init() -- initialize the frames on screen
 end
 
 function WFCShamanFrame:ModLayout()
-    local warnsize = wfcdb.warnsize or 4
-    local xsize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.xspace * 3
-    local ysize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.yspace * 3
+    local warnsize, size, space, xspace, yspace = wfcdb.warnsize or 4, wfcdb.size or 37, wfcdb.space or 4, wfcdb.xspace or 1, wfcdb.yspace or 0
+    local xsize = size + (size + space) * xspace * 3
+    local ysize = size + (size + space) * yspace * 3
     self:SetSize(xsize, ysize)
     for i = 0, 3 do
         local xpoint, ypoint =
-        i * (wfcdb.size + wfcdb.space) * wfcdb.xspace, i * (wfcdb.size + wfcdb.space) * wfcdb.yspace
+        i * (size + space) * xspace, i * (size + space) * yspace
         self.buttons[i]:SetPoint("TOPLEFT", self, "TOPLEFT", xpoint, ypoint)
-        self.buttons[i]:SetSize(wfcdb.size, wfcdb.size)
+        self.buttons[i]:SetSize(size, size)
         self.buttons[i].name:SetPoint("CENTER", self.buttons[i], "TOP", 0, 5)
-        self.buttons[i].bg:SetSize(wfcdb.size + warnsize * 2, wfcdb.size + warnsize * 2)
+        self.buttons[i].bg:SetSize(size + warnsize * 2, size + warnsize * 2)
         self.buttons[i].bg:SetPoint("TOPLEFT", self, "TOPLEFT", xpoint - warnsize, -ypoint + warnsize)
-        self.buttons[i].icon:SetSize(wfcdb.size, wfcdb.size)
+        self.buttons[i].icon:SetSize(size, size)
         self.buttons[i].icon:SetPoint("TOPLEFT", self, "TOPLEFT", xpoint, -ypoint)
         if warnsize == 0 then
             self.buttons[i].bg:Hide()
@@ -87,7 +87,7 @@ function WFCShamanFrame:SetSpacing(x)
     self:ModLayout()
 end
 
-function WFCShamanFrame:SetSize(x)
+function WFCShamanFrame:SetScale(x)
     wfcdb.size = tonumber(x)
     self:ModLayout()
 end

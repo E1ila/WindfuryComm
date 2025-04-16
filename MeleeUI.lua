@@ -28,11 +28,6 @@ local TOTEMS = {
 local totemFrames = {}
 local rowHeight = 28
 local encounter
-local stats = {
-    overall = {},
-    last = {},
-    shaman = nil,
-}
 
 local function uptimeText(uptime)
     local color = '|cffff0000'
@@ -68,24 +63,25 @@ end
 
 local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
     if wfcdbc and not wfcdbc.shown then return end
+    local stats = wfcdbc.stats
     if stats.shaman ~= shaman then
         stats.shaman = shaman
     end
     if combatTime > 1 then
-        stats.last.time = (stats.last.time or 0) + combatTime
-        stats.last.wf = math.floor(wfTime / combatTime * 100)
-        stats.last.str = math.floor(strTime / combatTime * 100)
-        stats.last.agi = math.floor(agiTime / combatTime * 100)
-        stats.last.frr = math.floor(frrTime / combatTime * 100)
-        stats.last.fr = math.floor(frTime / combatTime * 100)
-        stats.last.gnd = math.floor(gndTime / combatTime * 100)
+        stats.last.time = combatTime
+        stats.last.wf = wfTime or 0
+        stats.last.str = strTime or 0
+        stats.last.agi = agiTime or 0
+        stats.last.frr = frrTime or 0
+        stats.last.fr = frTime or 0
+        stats.last.gnd = gndTime or 0
         stats.overall.time = (stats.overall.time or 0) + combatTime
-        stats.overall.wf = (stats.overall.wf or 0) + stats.last.wf
-        stats.overall.str = (stats.overall.str or 0) + stats.last.str
-        stats.overall.agi = (stats.overall.agi or 0) + stats.last.agi
-        stats.overall.gnd = (stats.overall.gnd or 0) + stats.last.gnd
-        stats.overall.fr = (stats.overall.fr or 0) + stats.last.fr
-        stats.overall.frr = (stats.overall.frr or 0) + stats.last.frr
+        stats.overall.wf = (stats.overall.wf or 0) + (wfTime or 0)
+        stats.overall.str = (stats.overall.str or 0) + (strTime or 0)
+        stats.overall.agi = (stats.overall.agi or 0) + (agiTime or 0)
+        stats.overall.gnd = (stats.overall.gnd or 0) + (gndTime or 0)
+        stats.overall.fr = (stats.overall.fr or 0) + (frTime or 0)
+        stats.overall.frr = (stats.overall.frr or 0) + (frrTime or 0)
     end
     WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
     WFCMeleeFrame:UpdateTotemStats()
@@ -93,24 +89,29 @@ local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime
 end
 
 function WFCMeleeFrame:UpdateTotemStats()
-    local lookup = wfcdb.meleeCurrentSession and stats.last or stats.overall
+    local lookup = wfcdb.meleeCurrentSession and wfcdbc.stats.last or wfcdbc.stats.overall
     local frameIndex = 0
     for i = 1, #TOTEMS do
         local totemName = TOTEMS[i]
         local totemUptime = lookup[totemName] or 0
+        local combatTime = lookup.time
         if i <= 2 or totemUptime > 0 then
             frameIndex = frameIndex + 1
             if totemFrames[frameIndex] == nil then
                 self:AddTotemRow()
             end
             local frames = totemFrames[frameIndex]
-            local color, bgcolor = uptimeColor(totemUptime)
+            local uptime = 0
+            if combatTime and combatTime > 0 then
+                uptime = math.floor(totemUptime / combatTime * 100)
+            end
+            local color, bgcolor = uptimeColor(uptime)
             frames.root:Show()
-            frames.bar:SetValue(totemUptime)
+            frames.bar:SetValue(uptime)
             frames.bar:SetStatusBarColor(unpack(color))
             frames.icon.icon:SetTexture(ICONS[totemName])
             frames.root:SetBackdropColor(unpack(bgcolor))
-            frames.text:SetText(uptimeText(totemUptime))
+            frames.text:SetText(uptimeText(uptime))
         end
     end
     for i = frameIndex+1, #totemFrames do
@@ -127,15 +128,16 @@ function WFCMeleeFrame_SessionButton:ToggleSessionView()
 end
 
 function WFCMeleeFrame:ResetStats()
-    stats.overall = {}
-    stats.last = {}
-    stats.shaman = nil
+    wfcdbc.stats.overall = {}
+    wfcdbc.stats.last = {}
+    wfcdbc.stats.shaman = nil
+    WFCMeleeFrame_Title_Text:SetText("Totems")
     WFCMeleeFrame:UpdateTotemStats()
 end
 
 function WFCMeleeFrame:UpdateSessionViewText()
     local textstr = ""
-    local time = wfcdb.meleeCurrentSession and stats.last.time or stats.overall.time
+    local time = wfcdb.meleeCurrentSession and wfcdbc.stats.last.time or wfcdbc.stats.overall.time
     if time and time > 0 then
         local minutes = math.floor(time / 60)
         local seconds = time - (minutes * 60)
@@ -191,6 +193,11 @@ function WFCMeleeFrame:RegisterUptimeReport(wfcLib)
 end
 
 function WFCMeleeFrame:Init(wfcLib)
+    wfcdbc.stats = wfcdbc.stats or {
+        overall = {},
+        last = {},
+        shaman = nil,
+    }
     self:UpdateSessionViewText()
     self:AddTotemRow()
     self:AddTotemRow()
@@ -220,6 +227,7 @@ end
 
 function WFCMeleeFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
+        self:ResetStats()
         self:HideUI()
     end
 end
