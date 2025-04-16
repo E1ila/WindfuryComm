@@ -1,6 +1,6 @@
-wfcShamanFrame = CreateFrame("Frame", "wfcShamanFrame", UIParent)
-wfcShamanFrame.icons, wfcShamanFrame.guids, wfcShamanFrame.currentTimers, wfcShamanFrame.buttons = {}, {}, {}, {}
-wfcShamanFrame.ixs, wfcShamanFrame.party, wfcShamanFrame.class = {}, {}, {}
+WFCShamanFrame = CreateFrame("Frame", "WFCShamanFrame", UIParent)
+WFCShamanFrame.icons, WFCShamanFrame.guids, WFCShamanFrame.currentTimers, WFCShamanFrame.buttons = {}, {}, {}, {}
+WFCShamanFrame.ixs, WFCShamanFrame.party, WFCShamanFrame.class = {}, {}, {}
 
 local COMM_PREFIX = "WF_STATUS"
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
@@ -15,17 +15,17 @@ local classIcon = {
 -- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
 local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 
-function wfcShamanFrame:Init() -- initialize the frames on screen
+function WFCShamanFrame:Init() -- initialize the frames on screen
     self:SetPoint("CENTER", UIParent, 0, -225)
-    --wfcShamanFrame.texture = wfcShamanFrame:CreateTexture(nil, "BACKGROUND")
-    --wfcShamanFrame.texture:SetAllPoints()
-    --wfcShamanFrame.texture:SetColorTexture(0,0,0,0.3)
+    --WFCShamanFrame.texture = WFCShamanFrame:CreateTexture(nil, "BACKGROUND")
+    --WFCShamanFrame.texture:SetAllPoints()
+    --WFCShamanFrame.texture:SetColorTexture(0,0,0,0.3)
     self:EnableMouse(true)
     self:SetMovable(true)
     self:RegisterForDrag("LeftButton")
     self:SetScript("OnDragStart", function(self)
         if IsShiftKeyDown() then
-            wfcShamanFrame:StartMoving()
+            WFCShamanFrame:StartMoving()
         end
     end)
     self:SetScript("OnDragStop", self.StopMovingOrSizing)
@@ -46,10 +46,10 @@ function wfcShamanFrame:Init() -- initialize the frames on screen
         self.buttons[i]:Hide() -- hide buttons until group is joined
     end
     self:Hide() -- hide frame until group is joined
-    self:modLayout()
+    self:ModLayout()
 end
 
-function wfcShamanFrame:modLayout()
+function WFCShamanFrame:ModLayout()
     local warnsize = wfcdb.warnsize or 4
     local xsize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.xspace * 3
     local ysize = wfcdb.size + (wfcdb.size + wfcdb.space) * wfcdb.yspace * 3
@@ -70,30 +70,30 @@ function wfcShamanFrame:modLayout()
     end
 end
 
-function wfcShamanFrame:setSpacing(x)
+function WFCShamanFrame:SetSpacing(x)
     wfcdb.space = tonumber(x)
-    self:modLayout()
+    self:ModLayout()
 end
 
-function wfcShamanFrame:setSize(x)
+function WFCShamanFrame:SetSize(x)
     wfcdb.size = tonumber(x)
-    self:modLayout()
+    self:ModLayout()
 end
 
-function wfcShamanFrame:setWarnSize(x)
+function WFCShamanFrame:SetWarnSize(x)
     wfcdb.warnsize = tonumber(arg2)
-    self:modLayout()
+    self:ModLayout()
 end
 
-function wfcShamanFrame:flipLayout()
+function WFCShamanFrame:FlipLayout()
     if arg2 == "horizontal" then
         wfcdb.yspace = 0
         wfcdb.xspace = 1
-        self:modLayout()
+        self:ModLayout()
     elseif arg2 == "vertical" then
         wfcdb.yspace = 1
         wfcdb.xspace = 0
-        self:modLayout()
+        self:ModLayout()
     end
 end
 
@@ -109,7 +109,7 @@ local function getPartySig()
     return sig
 end
 
-function wfcShamanFrame:collectGroupInfo()
+function WFCShamanFrame:CollectGroupInfo()
     self:Show() -- group joined, show frame
     wipe(self.ixs)
     wipe(wfc.version)
@@ -133,7 +133,7 @@ function wfcShamanFrame:collectGroupInfo()
     j = nil
 end
 
-function wfcShamanFrame:resetGroup()
+function WFCShamanFrame:ResetGroup()
     for j = 0, 3 do
         self.buttons[j].name:SetText("")
         self.buttons[j].cd:SetCooldown(0, 0)
@@ -146,7 +146,7 @@ function wfcShamanFrame:resetGroup()
     self:Hide() -- group reset, hide frame
 end
 
-function wfcShamanFrame:startTimerButton(gGUID, remain)
+function WFCShamanFrame:StartTimerButton(gGUID, remain)
     icon = self.icons[gGUID]
     if remain > 0 and self.ixs[gGUID] then
         local j = self.ixs[gGUID]
@@ -158,7 +158,7 @@ function wfcShamanFrame:startTimerButton(gGUID, remain)
     end
 end
 
-function wfcShamanFrame:setBlockerButton(gGUID, remain, spellID)
+function WFCShamanFrame:SetBlockerButton(gGUID, remain, spellID)
     _, _, icon, _, _, _, _ = GetSpellInfo(spellID)
     if remain > 0 and self.ixs[gGUID] then
         local j = self.ixs[gGUID]
@@ -170,14 +170,14 @@ function wfcShamanFrame:setBlockerButton(gGUID, remain, spellID)
     end
 end
 
-function wfcShamanFrame:partyPlayerDead(playerIndex)
+function WFCShamanFrame:PartyPlayerDead(playerIndex)
     self.buttons[playerIndex].icon:SetAlpha(1)
     self.buttons[playerIndex].icon:SetDesaturated(1)
     self.buttons[playerIndex].cd:SetCooldown(0, 0)
     self.buttons[playerIndex].bg:SetAlpha(0)
 end
 
-function wfcShamanFrame:showWarning(playerIndex, combat)
+function WFCShamanFrame:ShowWarning(playerIndex, combat)
     self.buttons[playerIndex].icon:SetAlpha(1)
     self.buttons[playerIndex].icon:SetDesaturated(1)
     self.buttons[playerIndex].cd:SetCooldown(0, 0)
@@ -193,7 +193,7 @@ function wfcShamanFrame:showWarning(playerIndex, combat)
     end
 end
 
-function wfcShamanFrame:updateCurrentTimers()
+function WFCShamanFrame:UpdateCurrentTimers()
     wipe(self.currentTimers)
     for j = 0, 3 do
         if self.guids[j] then
@@ -203,31 +203,31 @@ function wfcShamanFrame:updateCurrentTimers()
     end
 end
 
-function wfcShamanFrame:restartCurrentTimers()
+function WFCShamanFrame:RestartCurrentTimers()
     for gGUID, j in pairs(self.ixs) do
         if self.currentTimers[gGUID] then
-            self:startTimerButton(gGUID, self.currentTimers[gGUID], self.icons[gGUID])
+            self:StartTimerButton(gGUID, self.currentTimers[gGUID], self.icons[gGUID])
         end
     end
     wipe(self.currentTimers)
 end
 
-function wfcShamanFrame:GROUP_ROSTER_UPDATE()
+function WFCShamanFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
-        self:resetGroup()
+        self:ResetGroup()
     else
         local partySig = getPartySig()
         if partySig ~= self.partySig then
-            self:updateCurrentTimers()
-            self:resetGroup()
-            self:collectGroupInfo()
-            self:restartCurrentTimers()
+            self:UpdateCurrentTimers()
+            self:ResetGroup()
+            self:CollectGroupInfo()
+            self:RestartCurrentTimers()
             self.partySig = partySig
         end
     end
 end
 
-function wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
+function WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
     if prefix == COMM_PREFIX then --new API
         local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
         local playerIndex = self.ixs[gGUID]
@@ -242,25 +242,25 @@ function wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
         wfc.version[sender] = version or "-"
 
         if isdead == "1" then
-            self:partyPlayerDead(playerIndex)
+            self:PartyPlayerDead(playerIndex)
         elseif spellName ~= nil then -- update buffs
             local _, _, lagHome, _ = GetNetStats()
             local remain = (expiration - (lag + lagHome)) / 1000
-            self:startTimerButton(gGUID, remain)
+            self:StartTimerButton(gGUID, remain)
         else -- addon installed or buff expired
-            self:showWarning(playerIndex, combat)
+            self:ShowWarning(playerIndex, combat)
         end
     end
 end
 
-function wfcShamanFrame:ShowUI()
+function WFCShamanFrame:ShowUI()
     self:Show()
     for i = 0, 3 do
         self.buttons[i]:Show()
     end
 end
 
-function wfcShamanFrame:HideUI()
+function WFCShamanFrame:HideUI()
     self:Hide()
     for i = 0, 3 do
         self.buttons[i]:Hide()

@@ -19,6 +19,7 @@ local ICONS = {
 
 local totemFrames = {}
 local rowHeight = 28
+local encounter
 
 local function uptimeText(uptime)
     local color = '|cffff0000'
@@ -51,11 +52,11 @@ local function uptimeColor(uptime)
     return color, bgcolor
 end
 
-function wfcMeleeFrame:showTotems(totemUptimes)
+function WFCMeleeFrame:ShowTotems(totemUptimes)
     for i = 1, #totemUptimes do
         local totemName, uptime = totemUptimes[i][1], totemUptimes[i][2]
         if totemFrames[i] == nil then
-            self:addTotemRow()
+            self:AddTotemRow()
         end
         local frames = totemFrames[i]
         local color, bgcolor = uptimeColor(uptime)
@@ -73,7 +74,7 @@ function wfcMeleeFrame:showTotems(totemUptimes)
         end
     end
     if wfcdb.shrink then
-        wfcMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
+        WFCMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
     end
 end
 
@@ -104,22 +105,22 @@ local function registerUptimeReport(wfcLib)
                     table.insert(totemUptimes, { "frr", frrUp })
                 end
             end
-            wfcMeleeFrame:showTotems(totemUptimes)
+            WFCMeleeFrame:ShowTotems(totemUptimes)
             wfcMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
-            wfcMeleeFrame:updateSessionViewText(combatTime)
-            wfcMeleeFrame:Show()
+            WFCMeleeFrame:UpdateSessionViewText(combatTime)
+            WFCMeleeFrame:Show()
         end
     else
         print("LibWFcomm not found!!")
     end
 end
 
-function wfcMeleeFrame_SessionButton:toggleSessionView()
+function wfcMeleeFrame_SessionButton:ToggleSessionView()
     wfcdb.meleeCurrentSession = not wfcdb.meleeCurrentSession
-    wfcMeleeFrame:updateSessionViewText()
+    WFCMeleeFrame:UpdateSessionViewText()
 end
 
-function wfcMeleeFrame:updateSessionViewText(time)
+function WFCMeleeFrame:UpdateSessionViewText(time)
     local textstr = ""
     if time and time > 0 then
         local minutes = math.floor(time / 60)
@@ -133,15 +134,15 @@ function wfcMeleeFrame:updateSessionViewText(time)
     end
 end
 
-function wfcMeleeFrame:addTotemRow()
+function WFCMeleeFrame:AddTotemRow()
     local index = #totemFrames + 1
 
-    local root = CreateFrame("FRAME", "wfcTotem"..tostring(index), wfcMeleeFrame, "wfcTotemTemplate");
+    local root = CreateFrame("FRAME", "wfcTotem"..tostring(index), WFCMeleeFrame, "wfcTotemTemplate");
     root:ClearAllPoints()
-    root:SetPoint("TOPLEFT", wfcMeleeFrame, "TOPLEFT", 3, -rowHeight * index - 10)
-    root:SetPoint("TOPRIGHT", wfcMeleeFrame, "TOPRIGHT", -3, -rowHeight * index - 10)
+    root:SetPoint("TOPLEFT", WFCMeleeFrame, "TOPLEFT", 3, -rowHeight * index - 10)
+    root:SetPoint("TOPRIGHT", WFCMeleeFrame, "TOPRIGHT", -3, -rowHeight * index - 10)
 
-    wfcMeleeFrame:SetHeight(index * rowHeight + 40)
+    WFCMeleeFrame:SetHeight(index * rowHeight + 40)
 
     local barElement = _G["wfcTotem"..tostring(index).."_Uptime_Bar"]
     local iconElement = _G["wfcTotem"..tostring(index).."_Icon"]
@@ -159,23 +160,23 @@ function wfcMeleeFrame:addTotemRow()
     textElement:SetText("--")
 end
 
-function wfcMeleeFrame:ShowUI()
-    wfcMeleeFrame:Show()
+function WFCMeleeFrame:ShowUI()
+    WFCMeleeFrame:Show()
 end
 
-function wfcMeleeFrame:HideUI()
-    wfcMeleeFrame:Hide()
+function WFCMeleeFrame:HideUI()
+    WFCMeleeFrame:Hide()
 end
 
-function wfcMeleeFrame:Init(wfcLib)
-    self:updateSessionViewText()
-    self:addTotemRow()
-    self:addTotemRow()
+function WFCMeleeFrame:Init(wfcLib)
+    self:UpdateSessionViewText()
+    self:AddTotemRow()
+    self:AddTotemRow()
     self:Hide()
     registerUptimeReport(wfcLib)
 end
 
-function wfcMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
+function WFCMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
     wfc.debug("ENCOUNTER_START", encounterId, encounterName)
     encounter = {
         id = encounterId,
@@ -184,16 +185,16 @@ function wfcMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
     }
 end
 
-function wfcMeleeFrame:ENCOUNTER_END(encounterId)
+function WFCMeleeFrame:ENCOUNTER_END(encounterId)
+    wfc.debug("ENCOUNTER_END", encounterId)
     if encounter then
-        wfc.debug("ENCOUNTER_END", encounterId)
         if encounterId == encounter.id then
             encounter.finish = GetTime()
         end
     end
 end
 
-function wfcMeleeFrame:GROUP_ROSTER_UPDATE()
+function WFCMeleeFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
         self:HideUI()
     end

@@ -94,17 +94,17 @@
         </Frames>
     </Frame>            <!--$parent_Buttons-->
 
-    <Frame name="wfcMeleeFrame" parent="UIParent" frameStrata="MEDIUM" enableMouse="true" movable="true" resizable="false" inherits="BackdropTemplate">
+    <Frame name="WFCMeleeFrame" parent="UIParent" frameStrata="MEDIUM" enableMouse="true" movable="true" resizable="false" inherits="BackdropTemplate">
         <Size x="120" y="130" />
         <Anchors>
             <Anchor point="TOP" relativeTo="$parent" />
         </Anchors>
         <Scripts>
             <OnDragStart>
-                wfcMeleeFrame:StartMoving()
+                WFCMeleeFrame:StartMoving()
             </OnDragStart>
             <OnDragStop>
-                wfcMeleeFrame:StopMovingOrSizing();
+                WFCMeleeFrame:StopMovingOrSizing();
             </OnDragStop>
             <OnLoad>
                 self:RegisterForDrag("LeftButton")

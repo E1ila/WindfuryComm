@@ -30,18 +30,18 @@ wfc.debug = debug
 function wfc:ShowUI(onload)
 	wfcdbc.shown = true
 	if isShaman then
-		wfcShamanFrame:ShowUI()
+		WFCShamanFrame:ShowUI()
 	elseif isMelee and not onload then
-		wfcMeleeFrame:ShowUI()
+		WFCMeleeFrame:ShowUI()
 	end
 end
 
 function wfc:HideUI()
 	wfcdbc.shown = false
 	if isShaman then
-		wfcShamanFrame:HideUI()
+		WFCShamanFrame:HideUI()
 	elseif isMelee then
-		wfcMeleeFrame:HideUI()
+		WFCMeleeFrame:HideUI()
 	end
 	out("UI hidden, write |cffff8800/wfc show|r to show it again")
 end
@@ -58,9 +58,9 @@ function wfc:ADDON_LOADED()
 		shown = true,
 	}
 	if isShaman then
-		wfcShamanFrame:Init() -- initiate frames early
+		WFCShamanFrame:Init() -- initiate frames early
 	elseif isMelee then
-		wfcMeleeFrame:Init(wfcLib)
+		WFCMeleeFrame:Init(wfcLib)
 	end
 	if wfcdbc.shown == nil or wfcdbc.shown then
 		self:ShowUI(true)
@@ -72,13 +72,13 @@ end
 local function wfSlashCommands(entry)
 	local arg1, arg2 = strsplit(" ", entry)
 	if isShaman and arg1 == "orientation" and (arg2 == "horizontal" or arg2 == "vertical") then
-		wfcShamanFrame:flipLayout()
+		WFCShamanFrame:FlipLayout()
 	elseif isShaman and arg1 == "spacing" and tonumber(arg2) then
-		wfcShamanFrame:setSpacing(arg2)
+		WFCShamanFrame:SetSpacing(arg2)
 	elseif isShaman and arg1 == "size" and tonumber(arg2) then
-		wfcShamanFrame:setSize(arg2)
+		WFCShamanFrame:SetSize(arg2)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
-		wfcShamanFrame:setWarnSize(arg2)
+		WFCShamanFrame:SetWarnSize(arg2)
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
@@ -118,17 +118,17 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	end
 	if isShaman then
 		if  event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
-			wfcShamanFrame:GROUP_ROSTER_UPDATE()
+			WFCShamanFrame:GROUP_ROSTER_UPDATE()
 		elseif event == "CHAT_MSG_ADDON" then
-			wfcShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
+			WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
 		end
 	elseif isMelee then
 		if event == "ENCOUNTER_START" then
-			wfcMeleeFrame:ENCOUNTER_START(...)
+			WFCMeleeFrame:ENCOUNTER_START(...)
 		elseif event == "ENCOUNTER_END" then
-			wfcMeleeFrame:ENCOUNTER_END(...)
+			WFCMeleeFrame:ENCOUNTER_END(...)
 		elseif event == "GROUP_ROSTER_UPDATE" then
-			wfcMeleeFrame:GROUP_ROSTER_UPDATE(...)
+			WFCMeleeFrame:GROUP_ROSTER_UPDATE(...)
 		end
 	end
 end)
