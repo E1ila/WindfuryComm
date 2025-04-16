@@ -8,14 +8,19 @@ local COLOR_NONE = {1, .2, 0, 1}
 local COLOR_BG = {0.1, 0.1, 0.1, 0.8}
 
 local ICONS = {
+    none = "Interface\\ICONS\\Spell_nature_cyclone",
     wf = "Interface\\ICONS\\Spell_Nature_Windfury",
     str = "Interface\\ICONS\\Spell_Nature_EarthBindTotem",
     agi = "Interface\\ICONS\\Spell_Nature_InvisibilityTotem",
+    fr = "Interface\\ICONS\\Spell_FireResistanceTotem_01",
+    frr = "Interface\\ICONS\\Spell_FrostResistanceTotem_01",
+    gnd = "Interface\\ICONS\\Spell_Nature_GroundingTotem",
 }
 
 local totemFrames = {}
+local rowHeight = 28
 
-local function uptimePercent(uptime)
+local function uptimeText(uptime)
     local color = '|cffff0000'
     if uptime > 90 then
         color = '|cff00ff00'
@@ -29,8 +34,8 @@ local function uptimePercent(uptime)
     return color..tostring(uptime)..'%|r'
 end
 
-local function setUptime(totemName, uptime)
-    local color, bgcolor = nil, COLOR_BG
+local function uptimeColor(uptime)
+    local color, bgcolor = nil, COLOR_NONE
     if uptime > 90 then
         color = COLOR_GOOD
     elseif uptime > 80 then
@@ -43,48 +48,62 @@ local function setUptime(totemName, uptime)
         color = COLOR_BAD
         bgcolor = COLOR_NONE
     end
-    local totems = totemFrames[totemName]
-    totems.bar:SetValue(uptime)
-    totems.bar:SetStatusBarColor(unpack(color))
-    totems.root:SetBackdropColor(unpack(bgcolor))
-    totems.text:SetText(uptimePercent(uptime))
+    return color, bgcolor
+end
+
+function wfcMeleeFrame:showTotems(totemUptimes)
+    for i = 1, #totemUptimes do
+        local totemName, uptime = totemUptimes[i][1], totemUptimes[i][2]
+        if totemFrames[i] == nil then
+            self:addTotemRow()
+        end
+        local frames = totemFrames[i]
+        local color, bgcolor = uptimeColor(uptime)
+        frames.root:Show()
+        frames.bar:SetValue(uptime)
+        frames.bar:SetStatusBarColor(unpack(color))
+        frames.icon.icon:SetTexture(ICONS[totemName])
+        frames.root:SetBackdropColor(unpack(bgcolor))
+        frames.text:SetText(uptimeText(uptime))
+    end
+    if #totemFrames > #totemUptimes then
+        for i = #totemUptimes+1, #totemFrames do
+            local frames = totemFrames[i]
+            frames.root:Hide()
+        end
+    end
+    wfcMeleeFrame:SetHeight(#totemUptimes * rowHeight + 40)
 end
 
 local function registerUptimeReport(wfcLib)
     if wfcLib then
-        local db = wfcdb
         wfcLib.UptimeReportHook = function (combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-            if combatTime > 1 and (encounter or db and db.alwaysReport) then
-                local wfUP = math.floor(wfTime / combatTime * 100)
-                local msg
-                if encounter and (not encounter.finish or GetTime() - encounter.finish < 5) then
-                    msg = 'Encounter |cff00ff00'..encounter.name..'|r ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
-                else
-                    msg = 'Combat ended with uptime of |cffff8800WF|r:'..uptimePercent(wfUP)
-                end
-                setUptime("wf", wfUP)
+            local totemUptimes = {}
+            if combatTime > 1 then
+                local wfUp = math.floor(wfTime / combatTime * 100)
                 local strUp = math.floor(strTime / combatTime * 100)
-                setUptime("str", strUp)
                 local agiUp = math.floor(agiTime / combatTime * 100)
-                setUptime("agi", agiUp)
-                if strTime > 0 then
-                    msg = msg..' |cffff8800STR|r:'..uptimePercent(strUp)
+                local frrUp = math.floor(frrTime / combatTime * 100)
+                local frUp = math.floor(frTime / combatTime * 100)
+                local gndUp = math.floor(gndTime / combatTime * 100)
+                table.insert(totemUptimes, { "wf", wfUp })
+                table.insert(totemUptimes, { "str", strUp })
+                if agiUp > 0 then
+                    table.insert(totemUptimes, { "agi", agiUp })
                 end
-                if agiTime > 0 then
-                    msg = msg..' |cffff8800AGI|r:'..uptimePercent(agiUp)
+                if gndUp > 0 then
+                    table.insert(totemUptimes, { "gnd", gndUp })
                 end
-                if frTime > 0 then
-                    msg = msg..' |cffff8800FR|r:'..uptimePercent(math.floor(frTime / combatTime * 100))
+                if frUp > 0 then
+                    table.insert(totemUptimes, { "fr", frUp })
                 end
-                if frrTime > 0 then
-                    msg = msg..' |cffff8800FrR|r:'..uptimePercent(math.floor(frrTime / combatTime * 100))
+                if frrUp > 0 then
+                    table.insert(totemUptimes, { "frr", frrUp })
                 end
-                if gndTime > 0 then
-                    msg = msg..' |cffff8800GND|r:'..uptimePercent(math.floor(gndTime / combatTime * 100))
-                end
-                wfc.out(msg..' by |cff0070DE'..tostring(shaman or '??'))
-                encounter = nil
             end
+            wfcMeleeFrame:showTotems(totemUptimes)
+            wfcMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
+            wfcMeleeFrame:updateSessionViewText(combatTime)
         end
     else
         print("LibWFcomm not found!!")
@@ -96,23 +115,41 @@ function wfcMeleeFrame_SessionButton:toggleSessionView()
     wfcMeleeFrame:updateSessionViewText()
 end
 
-function wfcMeleeFrame:updateSessionViewText()
+function wfcMeleeFrame:updateSessionViewText(time)
+    local textstr = ""
+    if time and time > 0 then
+        local minutes = math.floor(time / 60)
+        local seconds = time - (minutes * 60)
+        textstr = string.format(": %d:%02d", minutes, seconds)
+    end
     if wfcdb.meleeCurrentSession then
-        wfcMeleeFrame_Header_Text:SetText("Current Fight")
+        wfcMeleeFrame_Header_Text:SetText("Last Fight"..textstr)
     else
-        wfcMeleeFrame_Header_Text:SetText("Overall")
+        wfcMeleeFrame_Header_Text:SetText("Overall"..textstr)
     end
 end
 
-function wfcMeleeFrame:initTotem(name, parentElement, barElement, textElement, iconElement)
-    totemFrames[name] = {
-        root = parentElement,
+function wfcMeleeFrame:addTotemRow()
+    local index = #totemFrames + 1
+
+    local root = CreateFrame("FRAME", "wfcTotem"..tostring(index), wfcMeleeFrame, "wfcTotemTemplate");
+    root:ClearAllPoints()
+    root:SetPoint("TOPLEFT", wfcMeleeFrame, "TOPLEFT", 3, -rowHeight * index - 10)
+    root:SetPoint("TOPRIGHT", wfcMeleeFrame, "TOPRIGHT", -3, -rowHeight * index - 10)
+
+    wfcMeleeFrame:SetHeight(index * rowHeight + 40)
+
+    local barElement = _G["wfcTotem"..tostring(index).."_Uptime_Bar"]
+    local iconElement = _G["wfcTotem"..tostring(index).."_Icon"]
+    local textElement = _G["wfcTotem"..tostring(index).."_Uptime_Bar_Text"]
+    totemFrames[index] = {
+        root = root,
         bar = barElement,
         text = textElement,
         icon = iconElement,
     }
-    parentElement:SetBackdropColor(unpack(COLOR_BG))
-    iconElement:SetTexture(ICONS[name])
+    root:SetBackdropColor(unpack(COLOR_BG))
+    iconElement.icon:SetTexture(ICONS.none)
     barElement:SetMinMaxValues(0, 100)
     barElement:SetValue(0)
     textElement:SetText("--")
@@ -120,16 +157,10 @@ end
 
 function wfcMeleeFrame:init(wfcLib)
     self:updateSessionViewText()
+    self:addTotemRow()
+    self:addTotemRow()
     self:Show()
     registerUptimeReport(wfcLib)
-
-    self:initTotem("wf", WFCTotem1_Uptime, WFCTotem1_Uptime_Bar, WFCTotem1_Uptime_Bar_Text, WFCTotem1_Icon.icon)
-    self:initTotem("str", WFCTotem2_Uptime, WFCTotem2_Uptime_Bar, WFCTotem2_Uptime_Bar_Text, WFCTotem2_Icon.icon)
-    self:initTotem("agi", WFCTotem3_Uptime, WFCTotem3_Uptime_Bar, WFCTotem3_Uptime_Bar_Text, WFCTotem3_Icon.icon)
-
-    --("wf", 91)
-    --setUptime("str", 41)
-    --setUptime("agi", 1)
 end
 
 function wfcMeleeFrame:ENCOUNTER_START(encounterId, encounterName)

@@ -37,10 +37,67 @@
         </Member>
     </FontFamily>
 
+    <Frame name="wfcTotemTemplate" inherits="BackdropTemplate" virtual="true">
+        <Size y="30" />
+        <Frames>
+            <!-- create icon -->
+            <Frame name="$parent_Icon">
+                <Size x="25" y="25" />
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset x="1" y="-1" />
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self.icon = self:CreateTexture(nil, "ARTWORK")
+                        self.icon:SetSize(25, 25)
+                        self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            <Frame name="$parent_Uptime" inherits="BackdropTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent_Icon" relativePoint="TOPRIGHT" x="4" y="-1" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$parent_Icon" relativePoint="BOTTOMRIGHT" x="4" y="1" />
+                    <Anchor point="TOPRIGHT" relativeTo="$parent" x="-1" y="-1" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parent" x="-1" y="1" />
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
+                        self:SetBackdropColor (0.1, 0.1, 0.1, 0.8)
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <StatusBar name="$parent_Bar" inherits="TextStatusBar">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeTo="$parent"  />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$parent"  />
+                            <Anchor point="TOPRIGHT" relativeTo="$parent" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$parent" />
+                        </Anchors>
+                        <BarTexture file="Interface\RaidFrame\Raid-Bar-Hp-Fill"/>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <FontString name="$parent_Text" inherits="WfcNormalFont" text="--">
+                                    <Color r="0.3" g="0.7" b="1"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" />
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                    </StatusBar>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame>            <!--$parent_Buttons-->
+
     <Frame name="wfcMeleeFrame" parent="UIParent" frameStrata="MEDIUM" enableMouse="true" movable="true" resizable="false" inherits="BackdropTemplate">
         <Size x="120" y="130" />
         <Anchors>
-            <Anchor point="CENTER" />
+            <Anchor point="TOP" relativeTo="$parent" />
         </Anchors>
         <Scripts>
             <OnDragStart>
@@ -137,7 +194,7 @@
                 </Anchors>
                 <Layers>
                     <Layer level="BACKGROUND">
-                        <FontString name="$parent_Text" inherits="WfcSmallFont" text="Current Fight">
+                        <FontString name="$parent_Text" inherits="WfcSmallFont" text="Last Fight">
                             <Color r="1" g="0.9" b="0.2"/>
                             <Anchors>
                                 <Anchor point="CENTER" />
@@ -147,201 +204,7 @@
                 </Layers>
             </Frame>            <!--$parent_Header-->
 
-            <Frame name="WFCTotem1" inherits="BackdropTemplate">
-                <Size y="30" />
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parent">
-                        <Offset x="3" y="-40" />
-                    </Anchor>
-                    <Anchor point="TOPRIGHT" relativeTo="$parent">
-                        <Offset x="-3" y="-40" />
-                    </Anchor>
-                </Anchors>
-                <Frames>
-                    <!-- create icon -->
-                    <Button name="$parent_Icon">
-                        <Size x="25" y="25" />
-                        <Anchors>
-                            <Anchor point="TOPLEFT">
-                                <Offset x="1" y="-1" />
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self.icon = self:CreateTexture(nil, "ARTWORK")
-                                self.icon:SetSize(25, 25)
-                                self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
-                            </OnLoad>
-                        </Scripts>
-                    </Button>
-                    <Frame name="$parent_Uptime" inherits="BackdropTemplate">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="$parent_Icon" relativePoint="TOPRIGHT" x="4" y="-1" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$parent_Icon" relativePoint="BOTTOMRIGHT" x="4" y="1" />
-                            <Anchor point="TOPRIGHT" relativeTo="$parent" x="-1" y="-1" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$parent" x="-1" y="1" />
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
-                                self:SetBackdropColor (0.1, 0.1, 0.1, 0.8)
-                            </OnLoad>
-                        </Scripts>
-                        <Frames>
-                            <StatusBar name="$parent_Bar" inherits="TextStatusBar">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT" relativeTo="$parent"  />
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$parent"  />
-                                    <Anchor point="TOPRIGHT" relativeTo="$parent" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$parent" />
-                                </Anchors>
-                                <BarTexture file="Interface\RaidFrame\Raid-Bar-Hp-Fill"/>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString name="$parent_Text" inherits="WfcNormalFont" text="--">
-                                            <Color r="0.3" g="0.7" b="1"/>
-                                            <Anchors>
-                                                <Anchor point="CENTER" />
-                                            </Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                            </StatusBar>
-                        </Frames>
-                    </Frame>
-                </Frames>
-            </Frame>            <!--$parent_Buttons-->
-            <Frame name="WFCTotem2" inherits="BackdropTemplate">
-                <Size y="30" />
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parent">
-                        <Offset x="3" y="-70" />
-                    </Anchor>
-                    <Anchor point="TOPRIGHT" relativeTo="$parent">
-                        <Offset x="-3" y="-70" />
-                    </Anchor>
-                </Anchors>
-                <Frames>
-                    <!-- create icon -->
-                    <Button name="$parent_Icon">
-                        <Size x="25" y="25" />
-                        <Anchors>
-                            <Anchor point="TOPLEFT">
-                                <Offset x="1" y="-1" />
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self.icon = self:CreateTexture(nil, "ARTWORK")
-                                self.icon:SetTexture("Interface\\Icons\\Spell_Nature_Windfury")
-                                self.icon:SetSize(25, 25)
-                                self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
-                            </OnLoad>
-                        </Scripts>
-                    </Button>
-                    <Frame name="$parent_Uptime" inherits="BackdropTemplate">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="$parent_Icon" relativePoint="TOPRIGHT" x="4" y="-1" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$parent_Icon" relativePoint="BOTTOMRIGHT" x="4" y="1" />
-                            <Anchor point="TOPRIGHT" relativeTo="$parent" x="-1" y="-1" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$parent" x="-1" y="1" />
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
-                                self:SetBackdropColor (0.1, 0.1, 0.1, 0.8)
-                            </OnLoad>
-                        </Scripts>
-                        <Frames>
-                            <StatusBar name="$parent_Bar" inherits="TextStatusBar">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT" relativeTo="$parent"  />
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$parent"  />
-                                    <Anchor point="TOPRIGHT" relativeTo="$parent" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$parent" />
-                                </Anchors>
-                                <BarTexture file="Interface\RaidFrame\Raid-Bar-Hp-Fill"/>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString name="$parent_Text" inherits="WfcNormalFont" text="--">
-                                            <Color r="0.3" g="0.7" b="1"/>
-                                            <Anchors>
-                                                <Anchor point="CENTER" />
-                                            </Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                            </StatusBar>
-                        </Frames>
-                    </Frame>
-                </Frames>
-            </Frame>            <!--$parent_Buttons-->
-            <Frame name="WFCTotem3" inherits="BackdropTemplate">
-                <Size y="30" />
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parent">
-                        <Offset x="3" y="-100" />
-                    </Anchor>
-                    <Anchor point="TOPRIGHT" relativeTo="$parent">
-                        <Offset x="-3" y="-100" />
-                    </Anchor>
-                </Anchors>
-                <Frames>
-                    <!-- create icon -->
-                    <Button name="$parent_Icon">
-                        <Size x="25" y="25" />
-                        <Anchors>
-                            <Anchor point="TOPLEFT">
-                                <Offset x="1" y="-1" />
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self.icon = self:CreateTexture(nil, "ARTWORK")
-                                self.icon:SetTexture("Interface\\Icons\\Spell_Nature_Windfury")
-                                self.icon:SetSize(25, 25)
-                                self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
-                            </OnLoad>
-                        </Scripts>
-                    </Button>
-                    <Frame name="$parent_Uptime" inherits="BackdropTemplate">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="$parent_Icon" relativePoint="TOPRIGHT" x="4" y="-1" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$parent_Icon" relativePoint="BOTTOMRIGHT" x="4" y="1" />
-                            <Anchor point="TOPRIGHT" relativeTo="$parent" x="-1" y="-1" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$parent" x="-1" y="1" />
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                self:SetBackdrop ({bgFile = [[Interface\AddOns\WindfuryComm\background]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0}})
-                                self:SetBackdropColor (0.1, 0.1, 0.1, 0.8)
-                            </OnLoad>
-                        </Scripts>
-                        <Frames>
-                            <StatusBar name="$parent_Bar" inherits="TextStatusBar">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT" relativeTo="$parent"  />
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$parent"  />
-                                    <Anchor point="TOPRIGHT" relativeTo="$parent" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$parent" />
-                                </Anchors>
-                                <BarTexture file="Interface\RaidFrame\Raid-Bar-Hp-Fill"/>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString name="$parent_Text" inherits="WfcNormalFont" text="--">
-                                            <Color r="0.3" g="0.7" b="1"/>
-                                            <Anchors>
-                                                <Anchor point="CENTER" />
-                                            </Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                            </StatusBar>
-                        </Frames>
-                    </Frame>
-                </Frames>
-            </Frame>            <!--$parent_Buttons-->
-
+            <!-- totem rows -->
         </Frames>
     </Frame>    <!--RaidLogger_RaidWindow-->
 
