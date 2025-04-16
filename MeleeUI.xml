@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\..\FrameXML\UI.xsd">
 
-    <FontFamily name="WfcNormalFont" virtual="true">
+    <FontFamily name="WFCNormalFont" virtual="true">
         <Member alphabet="roman">
             <Font font="Fonts\FRIZQT__.TTF" height="11"/>
         </Member>
@@ -19,7 +19,7 @@
         </Member>
     </FontFamily>
 
-    <FontFamily name="WfcSmallFont" virtual="true">
+    <FontFamily name="WFCSmallFont" virtual="true">
         <Member alphabet="roman">
             <Font font="Fonts\FRIZQT__.TTF" height="9"/>
         </Member>
@@ -37,7 +37,7 @@
         </Member>
     </FontFamily>
 
-    <Frame name="wfcTotemTemplate" inherits="BackdropTemplate" virtual="true">
+    <Frame name="WFCTotemTemplate" inherits="BackdropTemplate" virtual="true">
         <Size y="30" />
         <Frames>
             <!-- create icon -->
@@ -80,7 +80,7 @@
                         <BarTexture file="Interface\RaidFrame\Raid-Bar-Hp-Fill"/>
                         <Layers>
                             <Layer level="OVERLAY">
-                                <FontString name="$parent_Text" inherits="WfcNormalFont" text="--">
+                                <FontString name="$parent_Text" inherits="WFCNormalFont" text="--">
                                     <Color r="0.3" g="0.7" b="1"/>
                                     <Anchors>
                                         <Anchor point="CENTER" />
@@ -167,7 +167,7 @@
                 </Anchors>
                 <Layers>
                     <Layer level="BACKGROUND">
-                        <FontString name="$parent_Text" inherits="WfcNormalFont" text="Totems">
+                        <FontString name="$parent_Text" inherits="WFCNormalFont" text="Totems">
                             <Color r="0.3" g="0.7" b="1"/>
                             <Anchors>
                                 <Anchor point="CENTER" />
@@ -193,7 +193,7 @@
                 </Anchors>
                 <Layers>
                     <Layer level="BACKGROUND">
-                        <FontString name="$parent_Text" inherits="WfcSmallFont" text="Last Fight">
+                        <FontString name="$parent_Text" inherits="WFCSmallFont" text="Last Fight">
                             <Color r="1" g="0.9" b="0.2"/>
                             <Anchors>
                                 <Anchor point="CENTER" />

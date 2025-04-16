@@ -69,7 +69,7 @@ function wfc:ADDON_LOADED()
 	end
 end
 
-local function wfSlashCommands(entry)
+local function WFCSlashCommands(entry)
 	local arg1, arg2 = strsplit(" ", entry)
 	if isShaman and arg1 == "orientation" and (arg2 == "horizontal" or arg2 == "vertical") then
 		WFCShamanFrame:FlipLayout()
@@ -134,4 +134,4 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 end)
 
 SLASH_WFC1 = "/wfc"
-SlashCmdList["WFC"] = wfSlashCommands
+SlashCmdList["WFC"] = WFCSlashCommands

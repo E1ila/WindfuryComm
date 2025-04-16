@@ -106,7 +106,7 @@ local function registerUptimeReport(wfcLib)
                 end
             end
             WFCMeleeFrame:ShowTotems(totemUptimes)
-            wfcMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
+            WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
             WFCMeleeFrame:UpdateSessionViewText(combatTime)
             WFCMeleeFrame:Show()
         end
@@ -115,7 +115,7 @@ local function registerUptimeReport(wfcLib)
     end
 end
 
-function wfcMeleeFrame_SessionButton:ToggleSessionView()
+function WFCMeleeFrame_SessionButton:ToggleSessionView()
     wfcdb.meleeCurrentSession = not wfcdb.meleeCurrentSession
     WFCMeleeFrame:UpdateSessionViewText()
 end
@@ -128,25 +128,25 @@ function WFCMeleeFrame:UpdateSessionViewText(time)
         textstr = string.format(": %d:%02d", minutes, seconds)
     end
     if wfcdb.meleeCurrentSession then
-        wfcMeleeFrame_Header_Text:SetText("Last Fight"..textstr)
+        WFCMeleeFrame_Header_Text:SetText("Last Fight"..textstr)
     else
-        wfcMeleeFrame_Header_Text:SetText("Overall"..textstr)
+        WFCMeleeFrame_Header_Text:SetText("Overall"..textstr)
     end
 end
 
 function WFCMeleeFrame:AddTotemRow()
     local index = #totemFrames + 1
 
-    local root = CreateFrame("FRAME", "wfcTotem"..tostring(index), WFCMeleeFrame, "wfcTotemTemplate");
+    local root = CreateFrame("FRAME", "WFCTotem"..tostring(index), WFCMeleeFrame, "WFCTotemTemplate");
     root:ClearAllPoints()
     root:SetPoint("TOPLEFT", WFCMeleeFrame, "TOPLEFT", 3, -rowHeight * index - 10)
     root:SetPoint("TOPRIGHT", WFCMeleeFrame, "TOPRIGHT", -3, -rowHeight * index - 10)
 
     WFCMeleeFrame:SetHeight(index * rowHeight + 40)
 
-    local barElement = _G["wfcTotem"..tostring(index).."_Uptime_Bar"]
-    local iconElement = _G["wfcTotem"..tostring(index).."_Icon"]
-    local textElement = _G["wfcTotem"..tostring(index).."_Uptime_Bar_Text"]
+    local barElement = _G["WFCTotem"..tostring(index).."_Uptime_Bar"]
+    local iconElement = _G["WFCTotem"..tostring(index).."_Icon"]
+    local textElement = _G["WFCTotem"..tostring(index).."_Uptime_Bar_Text"]
     totemFrames[index] = {
         root = root,
         bar = barElement,
