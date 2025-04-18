@@ -37,10 +37,12 @@ wfc.debug = debug
 local wasInGroup = IsInGroup()
 local function broadcastVersionIfNeeded()
 	local inGroup = IsInGroup()
-	if inGroup and not wasInGroup and CTL then
+	local joinedParty = inGroup and not wasInGroup
+	if joinedParty and CTL then
 		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, tostring(numericalVersion), 'RAID')
 	end
 	wasInGroup = inGroup
+	return joinedParty
 end
 
 function wfc:ShowUI(onload)
@@ -167,11 +169,11 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		wfc:ADDON_LOADED(...)
 	end
 	if event == "GROUP_ROSTER_UPDATE" then
-		broadcastVersionIfNeeded()
+		local joinedParty = broadcastVersionIfNeeded()
 		if isShaman then
-			WFCShamanFrame:GROUP_ROSTER_UPDATE(...)
+			WFCShamanFrame:GROUP_ROSTER_UPDATE(joinedParty)
 		elseif isMelee then
-			WFCMeleeFrame:GROUP_ROSTER_UPDATE(...)
+			WFCMeleeFrame:GROUP_ROSTER_UPDATE(joinedParty)
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		if isShaman then

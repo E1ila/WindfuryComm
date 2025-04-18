@@ -212,6 +212,12 @@ function WFCMeleeFrame:Init(wfcLib)
         last = {},
         shaman = nil,
     }
+    C_Timer.After(0.5, function()
+        -- anchor to top, required because the "movable" feature changes anchor
+        self:ClearAllPoints()
+        self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
+    end)
+
     self:UpdateSessionViewText()
     self:AddTotemRow()
     self:AddTotemRow()
@@ -239,9 +245,11 @@ function WFCMeleeFrame:ENCOUNTER_END(encounterId)
     end
 end
 
-function WFCMeleeFrame:GROUP_ROSTER_UPDATE()
-    if GetNumGroupMembers() == 0 then
+function WFCMeleeFrame:GROUP_ROSTER_UPDATE(joinedParty)
+    if joinedParty then
+        wfc.debug("Joined party, resetting stats")
         self:ResetStats()
+    elseif GetNumGroupMembers() == 0 then
         self:HideUI()
     end
 end
