@@ -182,7 +182,7 @@
                 </Layers>
             </Frame>            <!--$parent_Title-->
 
-            <Frame name="$parent_Header" frameStrata="HIGH" inherits="BackdropTemplate">
+            <Frame name="$parent_Header" inherits="BackdropTemplate">
                 <Size x="120" y="56" />
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
