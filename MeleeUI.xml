@@ -101,7 +101,9 @@
         </Anchors>
         <Scripts>
             <OnDragStart>
-                WFCMeleeFrame:StartMoving()
+                if not wfcdbc.locked then
+                    WFCMeleeFrame:StartMoving()
+                end
             </OnDragStart>
             <OnDragStop>
                 WFCMeleeFrame:StopMovingOrSizing();

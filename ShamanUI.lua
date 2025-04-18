@@ -36,7 +36,7 @@ function WFCShamanFrame:Init() -- initialize the frames on screen
     self:SetMovable(true)
     self:RegisterForDrag("LeftButton")
     self:SetScript("OnDragStart", function(self)
-        if IsShiftKeyDown() then
+        if not wfcdbc.locked then
             WFCShamanFrame:StartMoving()
         end
     end)

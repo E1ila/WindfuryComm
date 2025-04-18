@@ -9,7 +9,7 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
-local version = "2.0.0"
+local version = "2.1.0"
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
@@ -107,20 +107,23 @@ local function WFCSlashCommands(entry)
 		end
 	elseif arg1 == "show" then
 		wfc:ShowUI()
+	elseif arg1 == "lock" then
+		wfcdbc.locked = not wfcdbc.locked
+		wfc.out("Window is now " .. (wfcdbc.locked and "locked" or "unlocked"))
 	elseif arg1 == "hide" then
 		wfc:HideUI()
 	else
-		out("WindfuryComm++ commands:")
+		out("|cffff8800WindfuryComm++|r v"..version.." commands:")
 		out("/wfc <hide/show> - show or hide UI")
 		if isMelee then
 			out("/wfc reset - reset stats")
 		end
 		out("/wfc resetpos - reset window position")
+		out("/wfc lock - toggle lock/unlock window position ("..(wfcdbc.locked and "locked" or "unlocked")..")")
 		if isShaman then
 			out("/wfc orientation <horizontal/vertical> - layout of icons")
-			out("/wfc size <integer> (" .. wfcdb.size .. ") - scale of icons")
-			out("/wfc spacing <integer> (" .. wfcdb.space .. ") - spacing between icons")
-			out("/wfc ver - print version")
+			out("/wfc size <integer> - set size of icons (" .. wfcdb.size .. ")")
+			out("/wfc spacing <integer> - set spacing between icons (" .. wfcdb.space .. ")")
 			out("/wfc warn <integer> (" .. wfcdb.warnsize .. ") - size of warning border")
 		end
 	end

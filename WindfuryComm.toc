@@ -3,7 +3,7 @@
 ## Author: Kof, Yotta
 ## SavedVariables: wfcdb
 ## SavedVariablesPerCharacter: wfcdbc
-## v2.0.0
+## v2.1.0
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
