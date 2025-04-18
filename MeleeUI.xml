@@ -102,14 +102,12 @@
         <Scripts>
             <OnDragStart>
                 if not wfcdbc.locked then
-                    WFCMeleeFrame:StartMoving()
+                    self:StartMoving()
                 end
             </OnDragStart>
             <OnDragStop>
-                WFCMeleeFrame:StopMovingOrSizing();
-                -- Re-anchor top after move
-                self:ClearAllPoints()
-                self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
+                self:StopMovingOrSizing();
+                self:FixAnchor()
             </OnDragStop>
             <OnLoad>
                 self:RegisterForDrag("LeftButton")

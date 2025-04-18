@@ -206,6 +206,14 @@ function WFCMeleeFrame:RegisterUptimeReport(wfcLib)
     end
 end
 
+function WFCMeleeFrame:FixAnchor()
+    -- anchor to top, required because the "movable" feature changes anchor
+    if self:GetLeft() then
+        self:ClearAllPoints()
+        self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
+    end
+end
+
 function WFCMeleeFrame:Init(wfcLib)
     wfcdbc.stats = wfcdbc.stats or {
         overall = {},
@@ -213,9 +221,7 @@ function WFCMeleeFrame:Init(wfcLib)
         shaman = nil,
     }
     C_Timer.After(0.5, function()
-        -- anchor to top, required because the "movable" feature changes anchor
-        self:ClearAllPoints()
-        self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
+        WFCMeleeFrame:FixAnchor()
     end)
 
     self:UpdateSessionViewText()

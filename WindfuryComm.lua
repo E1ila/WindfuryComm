@@ -131,8 +131,16 @@ local function WFCSlashCommands(entry)
 			WFCMeleeFrame:ResetPos()
 		end
 	elseif arg1 == "debug" then
-		wfcdb.debug = not wfcdb.debug
-		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
+		if arg2 == "status" then
+			wfcdb.debugStatus = not wfcdb.debugStatus
+			out("Debug print for WF_STATUS is now " .. (wfcdb.debugStatus and "enabled" or "disabled"))
+		elseif arg2 == "credit" then
+			wfcdb.debugCredit = not wfcdb.debugCredit
+			out("Debug print for WF_CREDIT is now " .. (wfcdb.debugCredit and "enabled" or "disabled"))
+		else
+			wfcdb.debug = not wfcdb.debug
+			out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
+		end
 	elseif arg1 == "ver" then
 		for k, v in pairs(wfc.version) do
 			local name = GetUnitName(k)

@@ -3,6 +3,7 @@ WFCShamanFrame.icons, WFCShamanFrame.guids, WFCShamanFrame.currentTimers, WFCSha
 WFCShamanFrame.ixs, WFCShamanFrame.party, WFCShamanFrame.class = {}, {}, {}
 
 local COMM_PREFIX = "WF_STATUS"
+local COMM_PREFIX_CREDIT = "WF_CREDIT"
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 
 local classIcon = {
@@ -232,6 +233,40 @@ function WFCShamanFrame:HideUI()
     end
 end
 
+-- Message Handlers ------------------------------------------------------
+
+function WFCShamanFrame:OnWfRefreshMessage(prefix, message, channel, sender)
+    local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
+    local playerIndex = self.ixs[gGUID]
+    if not playerIndex then
+        return
+    end
+    spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
+    local spellName = spellTable[spellID]
+
+    if wfcdb.debugStatus then
+        wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
+    end
+    wfc.version[sender] = version or "-"
+
+    if isdead == "1" then
+        self:PartyPlayerDead(playerIndex)
+    elseif spellName ~= nil then -- update buffs
+        local _, _, lagHome, _ = GetNetStats()
+        local remain = (expiration - (lag + lagHome)) / 1000
+        self:StartTimerButton(gGUID, remain)
+    else -- addon installed or buff expired
+        self:ShowWarning(playerIndex, combat)
+    end
+end
+
+function WFCShamanFrame:OnWfMessage(prefix, message, channel, sender)
+    local combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime = strsplit(":", message)
+    if wfcdb.debugCredit then
+        wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', combatTime, wfTime, shaman, strTime or '-', agiTime or '-', frTime or '-', frrTime or '-', gndTime or '-')
+    end
+end
+
 -- Event Handlers ------------------------------------------------------
 
 function WFCShamanFrame:GROUP_ROSTER_UPDATE()
@@ -250,27 +285,9 @@ function WFCShamanFrame:GROUP_ROSTER_UPDATE()
 end
 
 function WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
-    if prefix == COMM_PREFIX then --new API
-        local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
-        local playerIndex = self.ixs[gGUID]
-        if not playerIndex then
-            return
-        end
-        spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
-        local spellName = spellTable[spellID]
-
-        wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
-
-        wfc.version[sender] = version or "-"
-
-        if isdead == "1" then
-            self:PartyPlayerDead(playerIndex)
-        elseif spellName ~= nil then -- update buffs
-            local _, _, lagHome, _ = GetNetStats()
-            local remain = (expiration - (lag + lagHome)) / 1000
-            self:StartTimerButton(gGUID, remain)
-        else -- addon installed or buff expired
-            self:ShowWarning(playerIndex, combat)
-        end
+    if prefix == COMM_PREFIX then
+        self:OnWfRefreshMessage(prefix, message, channel, sender)
+    elseif prefix == COMM_PREFIX_CREDIT then
+        self:OnWfMessage(prefix, message, channel, sender)
     end
 end
