@@ -132,14 +132,14 @@ local function WFCSlashCommands(entry)
 		end
 	elseif isShaman and arg1 == "print" then
 		wfcdb.printCredit = not wfcdb.printCredit
-		out("Totem uptime for party print is now " .. (wfcdb.printCredit and "enabled" or "disabled"))
+		out("Totem uptime for party print is now " .. (wfcdb.printCredit and "|cff00ff00enabled" or "|cffff0000disabled|r"))
 	elseif arg1 == "debug" then
 		if arg2 == "status" then
 			wfcdb.debugStatus = not wfcdb.debugStatus
-			out("Debug print for WF_STATUS is now " .. (wfcdb.debugStatus and "enabled" or "disabled"))
+			out("Debug print for WF_STATUS is now " .. (wfcdb.debugStatus and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
 		else
 			wfcdb.debug = not wfcdb.debug
-			out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
+			out("Debug print is now " .. (wfcdb.debug and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
 		end
 	elseif arg1 == "ver" then
 		for k, v in pairs(wfc.version) do
@@ -152,23 +152,23 @@ local function WFCSlashCommands(entry)
 		wfc:ShowUI()
 	elseif arg1 == "lock" then
 		wfcdbc.locked = not wfcdbc.locked
-		wfc.out("Window is now " .. (wfcdbc.locked and "locked" or "unlocked"))
+		wfc.out("Window is now " .. (wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r"))
 	elseif arg1 == "hide" then
 		wfc:HideUI()
 	else
-		out("|cffff8800WindfuryComm++|r v"..version.." commands:")
-		out("/wfc <hide/show> - show or hide UI")
+		out("|cffff8877WindfuryComm++ v"..version.." commands:")
+		out("|cFF00FFaa/wfc <hide/show>|r show or hide UI ("..(wfcdbc.shown and "|cff00ff00shown|r" or "|cffff0000hidden|r")..")")
 		if isMelee then
-			out("/wfc reset - reset stats")
+			out("|cFF00FFaa/wfc reset|r reset stats")
 		end
-		out("/wfc resetpos - reset window position")
-		out("/wfc lock - toggle lock/unlock window position ("..(wfcdbc.locked and "locked" or "unlocked")..")")
+		out("|cFF00FFaa/wfc resetpos|r reset window position")
+		out("|cFF00FFaa/wfc lock|r toggle lock/unlock window position ("..(wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r")..")")
 		if isShaman then
-			out("/wfc orientation <horizontal/vertical> - layout of icons")
-			out("/wfc size <integer> - set size of icons (" .. wfcdb.size .. ")")
-			out("/wfc spacing <integer> - set spacing between icons (" .. wfcdb.space .. ")")
-			out("/wfc print - toggle printing of party totem uptime (" .. tostring(wfcdb.printCredit and "enabled" or "disabled") .. ")")
-			out("/wfc warn <integer> (" .. wfcdb.warnsize .. ") - size of warning border")
+			out("|cFF00FFaa/wfc orientation <horizontal/vertical>|r layout of icons ("..(wfcdb.orientation == "horizontal" and "|cff00ff00horizontal|r" or "|cffff0000vertical|r")..")")
+			out("|cFF00FFaa/wfc size <integer>|r set size of icons (|cff00bbff" .. wfcdb.size .. "|r)")
+			out("|cFF00FFaa/wfc spacing <integer>|r set spacing between icons (|cff00bbff" .. wfcdb.space .. "|r)")
+			out("|cFF00FFaa/wfc print|r toggle printing of party totem uptime (" .. tostring(wfcdb.printCredit and "|cff00ff00enabled|r" or "|cffff0000disabled|r") .. ")")
+			out("|cFF00FFaa/wfc warn <integer>|r size of warning border (|cff00bbff" .. wfcdb.warnsize .. "|r)")
 		end
 	end
 end

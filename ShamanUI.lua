@@ -262,10 +262,10 @@ function WFCShamanFrame:OnWfRefreshMessage(prefix, message, channel, sender)
 end
 
 function WFCShamanFrame:OnWfMessage(prefix, message, channel, sender)
-    local combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime = strsplit(":", message)
-    local index = self.partyIndex[sender]
-    if index > 0 then
-        if wfcdb.printCredit then
+    if wfcdb.printCredit then
+        local index = self.partyIndex[sender]
+        if index > 0 then
+            local combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime = strsplit(":", message)
             combatTime, agiTime, frTime, frrTime, gndTime = tonumber(combatTime), tonumber(agiTime or '0'), tonumber(frTime or '0'), tonumber(frrTime or '0'), tonumber(gndTime or '0')
             local stats = "|cff00bbffWF|r:"..WFCMeleeFrame:UptimeTextSeconds(tonumber(wfTime), combatTime)
             stats = stats.." |cff00bbffSTR|r:"..WFCMeleeFrame:UptimeTextSeconds(tonumber(strTime), combatTime)
@@ -285,8 +285,8 @@ function WFCShamanFrame:OnWfMessage(prefix, message, channel, sender)
             local className = self.class[self.guids[index-1] or ''] or "WARRIOR"
             local colorName = "|c"..RAID_CLASS_COLORS[className].colorStr..strippedName.."|r"
             wfc.out(colorName, stats)
+            --WFCMeleeFrame:UptimeReport(tonumber(combatTime), tonumber(wfTime), shaman, tonumber(strTime), tonumber(agiTime), tonumber(frTime), tonumber(frrTime), tonumber(gndTime), sender, "FINAL")
         end
-        --WFCMeleeFrame:UptimeReport(tonumber(combatTime), tonumber(wfTime), shaman, tonumber(strTime), tonumber(agiTime), tonumber(frTime), tonumber(frrTime), tonumber(gndTime), sender, "FINAL")
     end
 end
 
