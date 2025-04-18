@@ -62,7 +62,7 @@ local function uptimeColor(uptime)
 end
 
 -- hook when LibWF sends a report
-local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
+local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, reportType)
     -- stats collection
     if not wfcdbc then return end
     if not wfcdbc.stats then wfcdbc.stats = {} end
@@ -78,13 +78,15 @@ local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime
         stats.last.frr = frrTime or 0
         stats.last.fr = frTime or 0
         stats.last.gnd = gndTime or 0
-        stats.overall.time = (stats.overall.time or 0) + combatTime
-        stats.overall.wf = (stats.overall.wf or 0) + (wfTime or 0)
-        stats.overall.str = (stats.overall.str or 0) + (strTime or 0)
-        stats.overall.agi = (stats.overall.agi or 0) + (agiTime or 0)
-        stats.overall.gnd = (stats.overall.gnd or 0) + (gndTime or 0)
-        stats.overall.fr = (stats.overall.fr or 0) + (frTime or 0)
-        stats.overall.frr = (stats.overall.frr or 0) + (frrTime or 0)
+        if (reportType == 'FINAL') then
+            stats.overall.time = (stats.overall.time or 0) + combatTime
+            stats.overall.wf = (stats.overall.wf or 0) + (wfTime or 0)
+            stats.overall.str = (stats.overall.str or 0) + (strTime or 0)
+            stats.overall.agi = (stats.overall.agi or 0) + (agiTime or 0)
+            stats.overall.gnd = (stats.overall.gnd or 0) + (gndTime or 0)
+            stats.overall.fr = (stats.overall.fr or 0) + (frTime or 0)
+            stats.overall.frr = (stats.overall.frr or 0) + (frrTime or 0)
+        end
     end
     -- update UI
     WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
@@ -150,7 +152,7 @@ function WFCMeleeFrame:UpdateSessionViewText()
         textstr = string.format(": %d:%02d", minutes, seconds)
     end
     if wfcdb.meleeCurrentSession then
-        WFCMeleeFrame_Header_Text:SetText("Last Fight"..textstr)
+        WFCMeleeFrame_Header_Text:SetText("Current Fight"..textstr)
     else
         WFCMeleeFrame_Header_Text:SetText("Overall"..textstr)
     end

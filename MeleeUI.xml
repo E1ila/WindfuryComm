@@ -193,7 +193,7 @@
                 </Anchors>
                 <Layers>
                     <Layer level="BACKGROUND">
-                        <FontString name="$parent_Text" inherits="WFCSmallFont" text="Last Fight">
+                        <FontString name="$parent_Text" inherits="WFCSmallFont" text="Current Fight">
                             <Color r="1" g="0.9" b="0.2"/>
                             <Anchors>
                                 <Anchor point="CENTER" />

@@ -31,6 +31,7 @@ local TRACKED_AURA_NAMES = {
     ["GND"] = "Grounding Totem",
 }
 local TRACKED_AURAS_LIST = { "WF", "STR", "AGI", "FR", "FrR", "GND" }
+local PERIODIC_UPDATE_SECONDS = 1
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_CREDIT)
@@ -52,6 +53,36 @@ local cs = {
 }
 LibWFCombatStats = cs
 local selfName = UnitName("player")
+local periodicUpdate = GetTime()
+
+local function reportUptime(sendAddonMsg)
+    for _, spellCategory in ipairs(TRACKED_AURAS_LIST) do
+        if cs.start[spellCategory] then
+            cs.time[spellCategory] = cs.time[spellCategory] + (GetTime() - cs.start[spellCategory])
+            cs.start[spellCategory] = GetTime()
+        end
+    end
+
+    local type = 'LIVE'
+    local combatTime = math.floor(GetTime() - cs.start.combat + 0.5)
+    if myShaman and combatTime > 1 then
+        -- report uptime
+        local wfTime = math.min(math.floor((cs.time.WF or 0) + 0.5), combatTime)
+        local strTime = math.min(math.floor((cs.time.STR or 0) + 0.5), combatTime)
+        local agiTime = math.min(math.floor((cs.time.AGI or 0) + 0.5), combatTime)
+        local frTime = math.min(math.floor((cs.time.FR or 0) + 0.5), combatTime)
+        local frrTime = math.min(math.floor((cs.time.FrR or 0) + 0.5), combatTime)
+        local gndTime = math.min(math.floor((cs.time.GND or 0) + 0.5), combatTime)
+        if sendAddonMsg then
+            local creditmsg = format("%d:%d:%s:%d:%d:%d:%d:%d", combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime)
+            CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
+            type = 'FINAL'
+        end
+        if LibWFcomm and LibWFcomm.UptimeReportHook then
+            LibWFcomm.UptimeReportHook(combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime, selfName, type)
+        end
+    end
+end
 
 local function checkCombatStartOrEnd(combat)
     if not cs.start.combat and combat then
@@ -60,29 +91,10 @@ local function checkCombatStartOrEnd(combat)
         cs.start.combat = GetTime()
         cs.time = {}
         cs.time.WF = 0
+        periodicUpdate = GetTime()
     elseif cs.start.combat and not combat then
         -- combat ended
-        for _, spellCategory in ipairs(TRACKED_AURAS_LIST) do
-            if cs.start[spellCategory] then
-                cs.time[spellCategory] = cs.time[spellCategory] + (GetTime() - cs.start[spellCategory])
-                cs.start[spellCategory] = nil
-            end
-        end
-        local combatTime = math.floor(GetTime() - cs.start.combat + 0.5)
-        if myShaman and combatTime > 1 then
-            -- report uptime
-            local wfTime = math.min(math.floor((cs.time.WF or 0) + 0.5), combatTime)
-            local strTime = math.min(math.floor((cs.time.STR or 0) + 0.5), combatTime)
-            local agiTime = math.min(math.floor((cs.time.AGI or 0) + 0.5), combatTime)
-            local frTime = math.min(math.floor((cs.time.FR or 0) + 0.5), combatTime)
-            local frrTime = math.min(math.floor((cs.time.FrR or 0) + 0.5), combatTime)
-            local gndTime = math.min(math.floor((cs.time.GND or 0) + 0.5), combatTime)
-            local creditmsg = format("%d:%d:%s:%d:%d:%d:%d:%d", combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime)
-            CTL:SendAddonMessage("BULK", COMM_PREFIX_CREDIT, creditmsg, 'RAID')
-            if LibWFcomm and LibWFcomm.UptimeReportHook then
-                LibWFcomm.UptimeReportHook(combatTime, wfTime, myShaman, strTime, agiTime, frTime, frrTime, gndTime, selfName, 'DIRECT')
-            end
-        end
+        reportUptime(true)
         cs.start = {}
     end
 end
@@ -253,9 +265,17 @@ local function OnEvent(self, event, ...)
     LibWFcomm[event](LibWFcomm, ...)
 end
 
+local function OnUpdate(self)
+    if cs.start.combat and GetTime() - periodicUpdate > PERIODIC_UPDATE_SECONDS then
+        periodicUpdate = GetTime()
+        reportUptime()
+    end
+end
+
 if (pClass == "WARRIOR" or pClass == "ROGUE" or pClass == "PALADIN" or pClass == "HUNTER") then
     LibWFcomm.eventReg = LibWFcomm.eventReg or CreateFrame("Frame")
     LibWFcomm.eventReg:SetScript("OnEvent", OnEvent)
+    LibWFcomm.eventReg:SetScript("OnUpdate", OnUpdate)
     if (not IsLoggedIn()) then
         LibWFcomm.eventReg:RegisterEvent("PLAYER_LOGIN")
     else
