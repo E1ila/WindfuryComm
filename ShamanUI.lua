@@ -1,6 +1,4 @@
 WFCShamanFrame = CreateFrame("Frame", "WFCShamanFrame", UIParent)
-WFCShamanFrame.icons, WFCShamanFrame.guids, WFCShamanFrame.currentTimers, WFCShamanFrame.buttons = {}, {}, {}, {}
-WFCShamanFrame.ixs, WFCShamanFrame.party, WFCShamanFrame.class = {}, {}, {}
 
 local COMM_PREFIX = "WF_STATUS"
 local COMM_PREFIX_CREDIT = "WF_CREDIT"
@@ -29,10 +27,10 @@ local function getPartySig()
 end
 
 function WFCShamanFrame:Init() -- initialize the frames on screen
+    self.icons, self.guids, self.currentTimers, self.buttons = {}, {}, {}, {}
+    self.ixs, self.party, self.class, self.partyIndex = {}, {}, {}, {}
+
     self:SetPoint("CENTER", UIParent, 0, -225)
-    --WFCShamanFrame.texture = WFCShamanFrame:CreateTexture(nil, "BACKGROUND")
-    --WFCShamanFrame.texture:SetAllPoints()
-    --WFCShamanFrame.texture:SetColorTexture(0,0,0,0.3)
     self:EnableMouse(true)
     self:SetMovable(true)
     self:RegisterForDrag("LeftButton")
@@ -64,8 +62,8 @@ end
 
 function WFCShamanFrame:ResetPos()
     wfc.out("Resetting position")
-    WFCShamanFrame:ClearAllPoints()
-    WFCShamanFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+    self:ClearAllPoints()
+    self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
 end
 
 function WFCShamanFrame:ModLayout()
@@ -119,6 +117,7 @@ end
 function WFCShamanFrame:CollectGroupInfo()
     self:Show() -- group joined, show frame
     wipe(self.ixs)
+    wipe(self.partyIndex)
     wipe(wfc.version)
     local j = -1
     for index = 1, 4 do
@@ -126,9 +125,11 @@ function WFCShamanFrame:CollectGroupInfo()
         local gclass = select(2, UnitClass(pstring))
         self.buttons[index - 1]:Show() -- group joined, show buttons
         if classIcon[gclass] then
-            local gGUID, name, color = UnitGUID(pstring), UnitName(pstring), RAID_CLASS_COLORS[gclass]
+            local name, realm = UnitName(pstring)
+            local gGUID, color = UnitGUID(pstring), RAID_CLASS_COLORS[gclass]
             j = j + 1
-            self.ixs[gGUID], self.party[gGUID], self.class[gGUID], self.guids[j] = j, pstring, gGUID, gclass
+            self.partyIndex[name.."-"..realm] = index
+            self.ixs[gGUID], self.party[gGUID], self.class[gGUID], self.guids[j] = j, pstring, gclass, gGUID
             self.buttons[j].name:SetText(strsub(name, 1, 5))
             self.buttons[j].name:SetTextColor(color.r, color.g, color.b)
             self.buttons[j].icon:SetTexture(classIcon[gclass])
@@ -262,8 +263,30 @@ end
 
 function WFCShamanFrame:OnWfMessage(prefix, message, channel, sender)
     local combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime = strsplit(":", message)
-    if wfcdb.debugCredit then
-        wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', combatTime, wfTime, shaman, strTime or '-', agiTime or '-', frTime or '-', frrTime or '-', gndTime or '-')
+    local index = self.partyIndex[sender]
+    if index > 0 then
+        if wfcdb.printCredit then
+            combatTime, agiTime, frTime, frrTime, gndTime = tonumber(combatTime), tonumber(agiTime or '0'), tonumber(frTime or '0'), tonumber(frrTime or '0'), tonumber(gndTime or '0')
+            local stats = "|cff00bbffWF|r:"..WFCMeleeFrame:UptimeTextSeconds(tonumber(wfTime), combatTime)
+            stats = stats.." |cff00bbffSTR|r:"..WFCMeleeFrame:UptimeTextSeconds(tonumber(strTime), combatTime)
+            if agiTime > 0 then
+                stats = stats.." |cff00bbffAGI|r:"..WFCMeleeFrame:UptimeTextSeconds(agiTime, combatTime)
+            end
+            if frTime > 0 then
+                stats = stats.." |cff00bbffFR|r:"..WFCMeleeFrame:UptimeTextSeconds(frTime, combatTime)
+            end
+            if frrTime > 0 then
+                stats = stats.." |cff00bbffFrR|r:"..WFCMeleeFrame:UptimeTextSeconds(frrTime, combatTime)
+            end
+            if gndTime > 0 then
+                stats = stats.." |cff00bbffGND|r:"..WFCMeleeFrame:UptimeTextSeconds(gndTime, combatTime)
+            end
+            local strippedName = select(1, strsplit("-", sender))
+            local className = self.class[self.guids[index-1] or ''] or "WARRIOR"
+            local colorName = "|c"..RAID_CLASS_COLORS[className].colorStr..strippedName.."|r"
+            wfc.out(colorName, stats)
+        end
+        --WFCMeleeFrame:UptimeReport(tonumber(combatTime), tonumber(wfTime), shaman, tonumber(strTime), tonumber(agiTime), tonumber(frTime), tonumber(frrTime), tonumber(gndTime), sender, "FINAL")
     end
 end
 

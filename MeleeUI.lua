@@ -29,30 +29,38 @@ local totemFrames = {}
 local rowHeight = 28
 local encounter
 
-local function uptimeText(uptime)
+function WFCMeleeFrame:UptimeText(uptimePercent)
     local color = '|cffff0000'
-    if uptime > 90 then
+    if uptimePercent > 90 then
         color = '|cff00ff00'
-    elseif uptime > 80 then
+    elseif uptimePercent > 80 then
         color = '|cffb9f542'
-    elseif uptime > 60 then
+    elseif uptimePercent > 60 then
         color = '|cfff5ef42'
-    elseif uptime > 40 then
+    elseif uptimePercent > 40 then
         color = '|cfff5a142'
     end
-    return color..tostring(uptime)..'%|r'
+    return color..tostring(uptimePercent)..'%|r'
 end
 
-local function uptimeColor(uptime)
+function WFCMeleeFrame:UptimeTextSeconds(uptimeSec, combatTime)
+    local uptimePercent = 0
+    if combatTime and combatTime > 0 then
+        uptimePercent = math.floor(uptimeSec / combatTime * 100)
+    end
+    return self:UptimeText(uptimePercent)
+end
+
+function WFCMeleeFrame:UptimeColor(uptimePercent)
     local color, bgcolor = nil, COLOR_NONE
-    uptime = uptime or 0
-    if uptime > 90 then
+    uptimePercent = uptimePercent or 0
+    if uptimePercent > 90 then
         color = COLOR_GOOD
-    elseif uptime > 80 then
+    elseif uptimePercent > 80 then
         color = COLOR_WELL
-    elseif uptime > 60 then
+    elseif uptimePercent > 60 then
         color = COLOR_MED
-    elseif uptime > 40 then
+    elseif uptimePercent > 40 then
         color = COLOR_LOW
     else
         color = COLOR_BAD
@@ -62,7 +70,7 @@ local function uptimeColor(uptime)
 end
 
 -- hook when LibWF sends a report
-local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, reportType)
+function WFCMeleeFrame:UptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, reportType)
     -- stats collection
     if not wfcdbc then return end
     if not wfcdbc.stats then wfcdbc.stats = {} end
@@ -90,9 +98,9 @@ local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime
     end
     -- update UI
     WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
-    WFCMeleeFrame:UpdateTotemStats()
+    self:UpdateTotemStats()
     if wfcdbc and wfcdbc.shown then
-        WFCMeleeFrame:Show()
+        self:Show()
     end
 end
 
@@ -113,21 +121,21 @@ function WFCMeleeFrame:UpdateTotemStats()
             if combatTime and combatTime > 0 then
                 uptime = math.floor(totemUptime / combatTime * 100)
             end
-            local color, bgcolor = uptimeColor(uptime)
+            local color, bgcolor = self:UptimeColor(uptime)
             frames.root:Show()
             frames.bar:SetValue(uptime)
             frames.bar:SetStatusBarColor(unpack(color))
             frames.icon.icon:SetTexture(ICONS[totemName])
             frames.root:SetBackdropColor(unpack(bgcolor))
-            frames.text:SetText(uptimeText(uptime))
+            frames.text:SetText(self:UptimeText(uptime))
         end
     end
     for i = frameIndex+1, #totemFrames do
         local frames = totemFrames[i]
         frames.root:Hide()
     end
-    WFCMeleeFrame:SetHeight(frameIndex * rowHeight + 40)
-    WFCMeleeFrame:UpdateSessionViewText()
+    self:SetHeight(frameIndex * rowHeight + 40)
+    self:UpdateSessionViewText()
 end
 
 function WFCMeleeFrame_SessionButton:ToggleSessionView()
@@ -200,7 +208,9 @@ end
 
 function WFCMeleeFrame:RegisterUptimeReport(wfcLib)
     if wfcLib then
-        wfcLib.UptimeReportHook = uptimeReport
+        wfcLib.UptimeReportHook = function (...)
+            WFCMeleeFrame:UptimeReport(...)
+        end
     else
         wfc.out("LibWFcomm not found!")
     end

@@ -130,13 +130,13 @@ local function WFCSlashCommands(entry)
 		elseif isMelee then
 			WFCMeleeFrame:ResetPos()
 		end
+	elseif isShaman and arg1 == "print" then
+		wfcdb.printCredit = not wfcdb.printCredit
+		out("Totem uptime for party print is now " .. (wfcdb.printCredit and "enabled" or "disabled"))
 	elseif arg1 == "debug" then
 		if arg2 == "status" then
 			wfcdb.debugStatus = not wfcdb.debugStatus
 			out("Debug print for WF_STATUS is now " .. (wfcdb.debugStatus and "enabled" or "disabled"))
-		elseif arg2 == "credit" then
-			wfcdb.debugCredit = not wfcdb.debugCredit
-			out("Debug print for WF_CREDIT is now " .. (wfcdb.debugCredit and "enabled" or "disabled"))
 		else
 			wfcdb.debug = not wfcdb.debug
 			out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
@@ -167,6 +167,7 @@ local function WFCSlashCommands(entry)
 			out("/wfc orientation <horizontal/vertical> - layout of icons")
 			out("/wfc size <integer> - set size of icons (" .. wfcdb.size .. ")")
 			out("/wfc spacing <integer> - set spacing between icons (" .. wfcdb.space .. ")")
+			out("/wfc print - toggle printing of party totem uptime (" .. tostring(wfcdb.printCredit and "enabled" or "disabled") .. ")")
 			out("/wfc warn <integer> (" .. wfcdb.warnsize .. ") - size of warning border")
 		end
 	end
