@@ -10,6 +10,8 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
 local version = "2.1.0"
+local numericalVersion = 20100
+local newVersionAlerted = false
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
@@ -18,6 +20,7 @@ local wfcLib = LibStub("LibWFcomm")
 local CTL = _G.ChatThrottleLib
 
 local COMM_PREFIX_VERSION = "WFC_VERSION"
+C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_VERSION)
 
 local function out(text, ...)
 	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)
@@ -30,6 +33,15 @@ local function debug(text, ...)
 	end
 end
 wfc.debug = debug
+
+local wasInGroup = IsInGroup()
+local function broadcastVersionIfNeeded()
+	local inGroup = IsInGroup()
+	if inGroup and not wasInGroup and CTL then
+		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, tostring(numericalVersion), 'RAID')
+	end
+	wasInGroup = inGroup
+end
 
 function wfc:ShowUI(onload)
 	wfcdbc.shown = true
@@ -50,17 +62,23 @@ function wfc:HideUI()
 	out("UI hidden, write |cffff8800/wfc show|r to show it again")
 end
 
-function wfc:ADDON_LOADED()
-	wfc.eventReg:UnregisterEvent("ADDON_LOADED")
+function wfc:InitSavedVariables()
 	wfcdb = wfcdb or {
+		version = numericalVersion,
 		size = 37,
 		space = 4,
 		yspace = 0,
 		xspace = 1,
 	}
 	wfcdbc = wfcdbc or {
+		version = numericalVersion,
 		shown = true,
 	}
+	if not wfcdb.version then wfcdb.version = numericalVersion end
+	if not wfcdbc.version then wfcdbc.version = numericalVersion end
+end
+
+function wfc:InitUI()
 	if isShaman then
 		WFCShamanFrame:Init() -- initiate frames early
 	elseif isMelee then
@@ -71,10 +89,25 @@ function wfc:ADDON_LOADED()
 	else
 		self:HideUI()
 	end
+end
+
+function wfc:ADDON_LOADED()
+	self.eventReg:UnregisterEvent("ADDON_LOADED")
+	self:InitSavedVariables()
+	self:InitUI()
 	out("WindfuryComm++ v"..version.." loaded")
-	--if CTL then
-		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, version, 'GUILD')
-	--end
+end
+
+function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
+	if prefix == COMM_PREFIX_VERSION then
+		local otherVersion = tonumber(message)
+		if not newVersionAlerted and otherVersion and otherVersion > numericalVersion then
+			newVersionAlerted = true
+			out("|cff00bbffThere's a newer version of WindfuryComm++, please update.|r")
+		end
+	elseif isShaman then
+		WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
+	end
 end
 
 local function WFCSlashCommands(entry)
@@ -133,19 +166,26 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	if event == "ADDON_LOADED" then
 		wfc:ADDON_LOADED(...)
 	end
-	if isShaman then
-		if  event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+	if event == "GROUP_ROSTER_UPDATE" then
+		broadcastVersionIfNeeded()
+		if isShaman then
 			WFCShamanFrame:GROUP_ROSTER_UPDATE(...)
-		elseif event == "CHAT_MSG_ADDON" then
-			WFCShamanFrame:CHAT_MSG_ADDON(...)
-		end
-	elseif isMelee then
-		if event == "ENCOUNTER_START" then
-			WFCMeleeFrame:ENCOUNTER_START(...)
-		elseif event == "ENCOUNTER_END" then
-			WFCMeleeFrame:ENCOUNTER_END(...)
-		elseif event == "GROUP_ROSTER_UPDATE" then
+		elseif isMelee then
 			WFCMeleeFrame:GROUP_ROSTER_UPDATE(...)
+		end
+	elseif event == "PLAYER_ENTERING_WORLD" then
+		if isShaman then
+			WFCShamanFrame:GROUP_ROSTER_UPDATE(...)
+		end
+	elseif event == "CHAT_MSG_ADDON" then
+		wfc:CHAT_MSG_ADDON(...)
+	elseif event == "ENCOUNTER_START" then
+		if isMelee then
+			WFCMeleeFrame:ENCOUNTER_START(...)
+		end
+	elseif event == "ENCOUNTER_END" then
+		if isMelee then
+			WFCMeleeFrame:ENCOUNTER_END(...)
 		end
 	end
 end)
