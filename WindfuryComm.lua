@@ -9,11 +9,15 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
+local version = "2.0.0"
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
 
 local wfcLib = LibStub("LibWFcomm")
+local CTL = _G.ChatThrottleLib
+
+local COMM_PREFIX_VERSION = "WFC_VERSION"
 
 local function out(text, ...)
 	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)
@@ -67,6 +71,10 @@ function wfc:ADDON_LOADED()
 	else
 		self:HideUI()
 	end
+	out("WindfuryComm++ v"..version.." loaded")
+	--if CTL then
+		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, version, 'GUILD')
+	--end
 end
 
 local function WFCSlashCommands(entry)
