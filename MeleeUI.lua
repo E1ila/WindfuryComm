@@ -114,7 +114,7 @@ function WFCMeleeFrame:UpdateTotemStats()
         if i <= 2 or totemUptime > 0 then
             frameIndex = frameIndex + 1
             if totemFrames[frameIndex] == nil then
-                self:AddTotemRow()
+                self:AddTotemRow(true)
             end
             local frames = totemFrames[frameIndex]
             local uptime = 0
@@ -172,15 +172,13 @@ function WFCMeleeFrame:UpdateSessionViewText()
     end
 end
 
-function WFCMeleeFrame:AddTotemRow()
+function WFCMeleeFrame:AddTotemRow(visible)
     local index = #totemFrames + 1
 
     local root = CreateFrame("FRAME", "WFCTotem"..tostring(index), WFCMeleeFrame, "WFCTotemTemplate");
     root:ClearAllPoints()
     root:SetPoint("TOPLEFT", WFCMeleeFrame, "TOPLEFT", 3, -rowHeight * index - 10)
     root:SetPoint("TOPRIGHT", WFCMeleeFrame, "TOPRIGHT", -3, -rowHeight * index - 10)
-
-    WFCMeleeFrame:SetHeight(index * rowHeight + 40)
 
     local barElement = _G["WFCTotem"..tostring(index).."_Uptime_Bar"]
     local iconElement = _G["WFCTotem"..tostring(index).."_Icon"]
@@ -196,6 +194,12 @@ function WFCMeleeFrame:AddTotemRow()
     barElement:SetMinMaxValues(0, 100)
     barElement:SetValue(0)
     textElement:SetText("--")
+
+    if not visible then
+        root:Hide()
+    else
+        WFCMeleeFrame:SetHeight(index * rowHeight + 40)
+    end
 end
 
 function WFCMeleeFrame:ShowUI()
@@ -235,6 +239,10 @@ function WFCMeleeFrame:Init(wfcLib)
     end)
 
     self:UpdateSessionViewText()
+    self:AddTotemRow(true)
+    self:AddTotemRow(true)
+    self:AddTotemRow()
+    self:AddTotemRow()
     self:AddTotemRow()
     self:AddTotemRow()
     self:Hide() -- shows only when receiving uptime report
