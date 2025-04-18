@@ -61,8 +61,11 @@ local function uptimeColor(uptime)
     return color, bgcolor
 end
 
+-- hook when LibWF sends a report
 local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime, reporter, channel)
-    if wfcdbc and not wfcdbc.shown then return end
+    -- stats collection
+    if not wfcdbc then return end
+    if not wfcdbc.stats then wfcdbc.stats = {} end
     local stats = wfcdbc.stats
     if stats.shaman ~= shaman then
         stats.shaman = shaman
@@ -83,9 +86,12 @@ local function uptimeReport(combatTime, wfTime, shaman, strTime, agiTime, frTime
         stats.overall.fr = (stats.overall.fr or 0) + (frTime or 0)
         stats.overall.frr = (stats.overall.frr or 0) + (frrTime or 0)
     end
+    -- update UI
     WFCMeleeFrame_Title_Text:SetText("|cff0070DE"..(shaman or "??").."|r")
     WFCMeleeFrame:UpdateTotemStats()
-    WFCMeleeFrame:Show()
+    if wfcdbc and wfcdbc.shown then
+        WFCMeleeFrame:Show()
+    end
 end
 
 function WFCMeleeFrame:UpdateTotemStats()
