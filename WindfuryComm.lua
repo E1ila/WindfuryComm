@@ -89,6 +89,12 @@ local function WFCSlashCommands(entry)
 		WFCShamanFrame:SetWarnSize(arg2)
 	elseif isMelee and arg1 == "reset" then
 		WFCMeleeFrame:ResetStats()
+	elseif arg1 == "resetpos" then
+		if isShaman then
+			WFCShamanFrame:ResetPos()
+		elseif isMelee then
+			WFCMeleeFrame:ResetPos()
+		end
 	elseif arg1 == "debug" then
 		wfcdb.debug = not wfcdb.debug
 		out("Debug print is now " .. (wfcdb.debug and "enabled" or "disabled"))
@@ -109,6 +115,7 @@ local function WFCSlashCommands(entry)
 		if isMelee then
 			out("/wfc reset - reset stats")
 		end
+		out("/wfc resetpos - reset window position")
 		if isShaman then
 			out("/wfc orientation <horizontal/vertical> - layout of icons")
 			out("/wfc size <integer> (" .. wfcdb.size .. ") - scale of icons")

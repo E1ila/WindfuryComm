@@ -61,6 +61,12 @@ function WFCShamanFrame:Init() -- initialize the frames on screen
     self:ModLayout()
 end
 
+function WFCShamanFrame:ResetPos()
+    wfc.out("Resetting position")
+    WFCShamanFrame:ClearAllPoints()
+    WFCShamanFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+end
+
 function WFCShamanFrame:ModLayout()
     local warnsize, size, space, xspace, yspace = wfcdb.warnsize or 4, wfcdb.size or 37, wfcdb.space or 4, wfcdb.xspace or 1, wfcdb.yspace or 0
     local xsize = size + (size + space) * xspace * 3

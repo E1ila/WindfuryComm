@@ -135,6 +135,12 @@ function WFCMeleeFrame_SessionButton:ToggleSessionView()
     WFCMeleeFrame:UpdateTotemStats()
 end
 
+function WFCMeleeFrame:ResetPos()
+    wfc.out("Resetting position")
+    WFCMeleeFrame:ClearAllPoints()
+    WFCMeleeFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+end
+
 function WFCMeleeFrame:ResetStats()
     wfcdbc.stats.overall = {}
     wfcdbc.stats.last = {}

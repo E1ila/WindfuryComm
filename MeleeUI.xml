@@ -97,7 +97,7 @@
     <Frame name="WFCMeleeFrame" parent="UIParent" frameStrata="MEDIUM" enableMouse="true" movable="true" resizable="false" inherits="BackdropTemplate">
         <Size x="120" y="130" />
         <Anchors>
-            <Anchor point="TOP" relativeTo="$parent" />
+            <Anchor point="TOP" relativeTo="UIParent" relativePoint="TOP" y="-100" />
         </Anchors>
         <Scripts>
             <OnDragStart>
@@ -105,6 +105,9 @@
             </OnDragStart>
             <OnDragStop>
                 WFCMeleeFrame:StopMovingOrSizing();
+                -- Re-anchor top after move
+                self:ClearAllPoints()
+                self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
             </OnDragStop>
             <OnLoad>
                 self:RegisterForDrag("LeftButton")
