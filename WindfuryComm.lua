@@ -192,17 +192,19 @@ local function WFCSlashCommands(entry)
 			out("Debug print is now " .. (wfcdb.debug and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
 		end
 	elseif arg1 == "ver" then
+		out("Your version: "..wfc.version)
+		out("Party versions: ")
 		for k, v in pairs(wfc.partyVersion) do
 			local name = GetUnitName(k)
 			if name then
-				out(name .. ": " .. v)
+				out("  "..name .. ": " .. v)
 			end
 		end
 	elseif arg1 == "show" then
 		wfc:ShowUI()
 	elseif arg1 == "lock" then
 		wfcdbc.locked = not wfcdbc.locked
-		wfc.out("Window is now " .. (wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r"))
+		out("Window is now " .. (wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r"))
 	elseif arg1 == "hide" then
 		wfc:HideUI()
 	else
