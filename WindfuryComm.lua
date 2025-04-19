@@ -1,4 +1,4 @@
-wfc = CreateFrame("Frame", "wfc")
+wfc = CreateFrame("Frame", "WindfuryCommPP")
 
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
