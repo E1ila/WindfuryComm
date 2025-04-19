@@ -1,5 +1,6 @@
 wfc = CreateFrame("Frame", "wfc")
 wfc.version = {}
+wfc.encounter = nil
 
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -140,6 +141,26 @@ function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	end
 end
 
+function wfc:ENCOUNTER_START(encounterId, encounterName)
+	wfc.debug("ENCOUNTER_START", encounterId, encounterName)
+	wfc.encounter = {
+		id = encounterId,
+		name = encounterName,
+		start = GetTime(),
+	}
+end
+
+function wfc:ENCOUNTER_END(encounterId)
+	wfc.debug("ENCOUNTER_END", encounterId)
+	if wfc.encounter then
+		if encounterId == wfc.encounter.id then
+			wfc.encounter.finish = GetTime()
+		else
+			wfc.encounter = nil
+		end
+	end
+end
+
 local function WFCSlashCommands(entry)
 	local arg1, arg2 = strsplit(" ", entry)
 	if isShaman and arg1 == "orientation" and (arg2 == "horizontal" or arg2 == "vertical") then
@@ -221,13 +242,9 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	elseif event == "CHAT_MSG_ADDON" then
 		wfc:CHAT_MSG_ADDON(...)
 	elseif event == "ENCOUNTER_START" then
-		if isMelee then
-			WFCMeleeFrame:ENCOUNTER_START(...)
-		end
+		wfc:ENCOUNTER_START(...)
 	elseif event == "ENCOUNTER_END" then
-		if isMelee then
-			WFCMeleeFrame:ENCOUNTER_END(...)
-		end
+		wfc:ENCOUNTER_END(...)
 	end
 end)
 

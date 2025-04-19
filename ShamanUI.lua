@@ -261,7 +261,7 @@ function WFCShamanFrame:OnWfRefreshMessage(prefix, message, channel, sender)
     end
 end
 
-function WFCShamanFrame:OnWfMessage(prefix, message, channel, sender)
+function WFCShamanFrame:OnWfCreditMessage(prefix, message, channel, sender)
     if wfcdb.printCredit then
         local index = self.partyIndex[sender]
         if index > 0 then
@@ -311,6 +311,6 @@ function WFCShamanFrame:CHAT_MSG_ADDON(prefix, message, channel, sender)
     if prefix == COMM_PREFIX then
         self:OnWfRefreshMessage(prefix, message, channel, sender)
     elseif prefix == COMM_PREFIX_CREDIT then
-        self:OnWfMessage(prefix, message, channel, sender)
+        self:OnWfCreditMessage(prefix, message, channel, sender)
     end
 end

@@ -27,7 +27,6 @@ local TOTEMS = {
 
 local totemFrames = {}
 local rowHeight = 28
-local encounter
 
 function WFCMeleeFrame:UptimeText(uptimePercent)
     local color = '|cffff0000'
@@ -250,24 +249,6 @@ function WFCMeleeFrame:Init(wfcLib)
 end
 
 -- Event Handlers ------------------------------------------------------
-
-function WFCMeleeFrame:ENCOUNTER_START(encounterId, encounterName)
-    wfc.debug("ENCOUNTER_START", encounterId, encounterName)
-    encounter = {
-        id = encounterId,
-        name = encounterName,
-        start = GetTime(),
-    }
-end
-
-function WFCMeleeFrame:ENCOUNTER_END(encounterId)
-    wfc.debug("ENCOUNTER_END", encounterId)
-    if encounter then
-        if encounterId == encounter.id then
-            encounter.finish = GetTime()
-        end
-    end
-end
 
 function WFCMeleeFrame:GROUP_ROSTER_UPDATE(joinedParty)
     if joinedParty then
