@@ -209,9 +209,9 @@ function WFCMeleeFrame:HideUI()
     WFCMeleeFrame:Hide()
 end
 
-function WFCMeleeFrame:RegisterUptimeReport(wfcLib)
-    if wfcLib then
-        wfcLib.UptimeReportHook = function (...)
+function WFCMeleeFrame:RegisterUptimeReport()
+    if wfc.lib then
+        wfc.lib.UptimeReportHook = function (...)
             WFCMeleeFrame:UptimeReport(...)
         end
     else
@@ -227,7 +227,7 @@ function WFCMeleeFrame:FixAnchor()
     end
 end
 
-function WFCMeleeFrame:Init(wfcLib)
+function WFCMeleeFrame:Init()
     wfcdbc.stats = wfcdbc.stats or {
         overall = {},
         last = {},
@@ -245,7 +245,7 @@ function WFCMeleeFrame:Init(wfcLib)
     self:AddTotemRow()
     self:AddTotemRow()
     self:Hide() -- shows only when receiving uptime report
-    self:RegisterUptimeReport(wfcLib)
+    self:RegisterUptimeReport()
 end
 
 -- Event Handlers ------------------------------------------------------

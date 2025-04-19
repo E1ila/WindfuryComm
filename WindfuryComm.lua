@@ -17,7 +17,7 @@ local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
 
-local wfcLib = LibStub("LibWFcomm")
+wfc.lib = LibStub("LibWFcomm")
 local CTL = _G.ChatThrottleLib
 
 local COMM_PREFIX_VERSION = "WFC_VERSION"
@@ -107,7 +107,7 @@ function wfc:InitUI()
 	if isShaman then
 		WFCShamanFrame:Init() -- initiate frames early
 	elseif isMelee then
-		WFCMeleeFrame:Init(wfcLib)
+		WFCMeleeFrame:Init()
 	end
 	if wfcdbc.shown == nil or wfcdbc.shown then
 		self:ShowUI(true)
