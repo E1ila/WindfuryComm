@@ -118,7 +118,7 @@ function WFCShamanFrame:CollectGroupInfo()
     self:Show() -- group joined, show frame
     wipe(self.ixs)
     wipe(self.partyIndex)
-    wipe(wfc.version)
+    wipe(wfc.partyVersion)
     local j = -1
     for index = 1, 4 do
         local pstring = "party" .. index
@@ -248,7 +248,7 @@ function WFCShamanFrame:OnWfRefreshMessage(prefix, message, channel, sender)
     if wfcdb.debugStatus then
         wfc.debug('|c99ff9900'..channel..'|r', '|cffdddddd'..prefix..'|r', '|cff99ff00'..sender..'|r', spellName or spellID or '-', 't'..(expiration and expiration / 1000 or '-'), 'c'..tostring(combat or "-"), 'd'..tostring(isdead or "-"), 'v'..(version or "-"))
     end
-    wfc.version[sender] = version or "-"
+    wfc.partyVersion[sender] = version or "-"
 
     if isdead == "1" then
         self:PartyPlayerDead(playerIndex)

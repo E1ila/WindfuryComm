@@ -1,5 +1,5 @@
 wfc = CreateFrame("Frame", "wfc")
-wfc.version = {}
+wfc.partyVersion = {}
 wfc.encounter = nil
 
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
@@ -10,8 +10,8 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
-local version = "2.1.0"
-local numericalVersion = 20100
+wfc.version = "2.1.0"
+wfc.numericalVersion = 20100
 local newVersionAlerted = false
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
@@ -54,18 +54,18 @@ local function broadcastVersionIfNeeded()
 	local inGroup = IsInGroup()
 	local joinedParty = inGroup and not wasInGroup
 	if joinedParty and CTL then
-		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, tostring(numericalVersion), 'RAID')
+		CTL:SendAddonMessage("BULK", COMM_PREFIX_VERSION, tostring(wfc.numericalVersion), 'RAID')
 	end
 	wasInGroup = inGroup
 	return joinedParty
 end
 
 local function sendPing()
-	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PING, tostring(numericalVersion), 'RAID')
+	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PING, tostring(wfc.numericalVersion), 'RAID')
 end
 
 local function sendPong(target)
-	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PONG, tostring(numericalVersion), 'WHISPER', target)
+	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PONG, tostring(wfc.numericalVersion), 'WHISPER', target)
 end
 
 function wfc:ShowUI(onload)
@@ -89,18 +89,18 @@ end
 
 function wfc:InitSavedVariables()
 	wfcdb = wfcdb or {
-		version = numericalVersion,
+		version = wfc.numericalVersion,
 		size = 37,
 		space = 4,
 		yspace = 0,
 		xspace = 1,
 	}
 	wfcdbc = wfcdbc or {
-		version = numericalVersion,
+		version = wfc.numericalVersion,
 		shown = true,
 	}
-	if not wfcdb.version then wfcdb.version = numericalVersion end
-	if not wfcdbc.version then wfcdbc.version = numericalVersion end
+	if not wfcdb.version then wfcdb.version = wfc.numericalVersion end
+	if not wfcdbc.version then wfcdbc.version = wfc.numericalVersion end
 end
 
 function wfc:InitUI()
@@ -120,7 +120,7 @@ function wfc:ADDON_LOADED()
 	self.eventReg:UnregisterEvent("ADDON_LOADED")
 	self:InitSavedVariables()
 	self:InitUI()
-	out("WindfuryComm++ v"..version.." loaded")
+	out("WindfuryComm++ v"..wfc.version.." loaded")
 end
 
 function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
@@ -132,7 +132,7 @@ function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
 		out("PONG", "|cff3399dd"..sender.."|r", "|cffffff00"..message)
 	elseif prefix == COMM_PREFIX_VERSION then
 		local otherVersion = tonumber(message)
-		if not newVersionAlerted and otherVersion and otherVersion > numericalVersion then
+		if not newVersionAlerted and otherVersion and otherVersion > wfc.numericalVersion then
 			newVersionAlerted = true
 			out("|cff00bbffThere's a newer version of WindfuryComm++, please update.|r")
 		end
@@ -193,7 +193,7 @@ local function WFCSlashCommands(entry)
 			out("Debug print is now " .. (wfcdb.debug and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
 		end
 	elseif arg1 == "ver" then
-		for k, v in pairs(wfc.version) do
+		for k, v in pairs(wfc.partyVersion) do
 			local name = GetUnitName(k)
 			if name then
 				out(name .. ": " .. v)
@@ -207,7 +207,7 @@ local function WFCSlashCommands(entry)
 	elseif arg1 == "hide" then
 		wfc:HideUI()
 	else
-		out("|cffff8877WindfuryComm++ v"..version.." commands:")
+		out("|cffff8877WindfuryComm++ v"..wfc.version.." commands:")
 		out("|cFF00FFaa/wfc <hide/show>|r show or hide UI ("..(wfcdbc.shown and "|cff00ff00shown|r" or "|cffff0000hidden|r")..")")
 		if isMelee then
 			out("|cFF00FFaa/wfc reset|r reset stats")
