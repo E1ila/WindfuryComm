@@ -39,7 +39,7 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
-function wfc:getFullName(unit)
+function wfc:GetFullName(unit)
 	local name, realm = UnitFullName(unit)
 	if realm and realm ~= "" then
 		return name .. "-" .. realm
@@ -47,10 +47,10 @@ function wfc:getFullName(unit)
 		return name
 	end
 end
-local myFullName = wfc:getFullName("player")
+local myFullName = wfc:GetFullName("player")
 
 local wasInGroup = IsInGroup()
-local function broadcastVersionIfNeeded()
+local function BroadcastVersionIfNeeded()
 	local inGroup = IsInGroup()
 	local joinedParty = inGroup and not wasInGroup
 	if joinedParty and CTL then
@@ -60,11 +60,11 @@ local function broadcastVersionIfNeeded()
 	return joinedParty
 end
 
-local function sendPing()
+local function SendPing()
 	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PING, tostring(wfc.numericalVersion), 'RAID')
 end
 
-local function sendPong(target)
+local function SendPong(target)
 	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PONG, tostring(wfc.numericalVersion), 'WHISPER', target)
 end
 
@@ -126,7 +126,7 @@ end
 function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	if prefix == COMM_PREFIX_PING then
 		if (sender ~= myFullName) then
-			sendPong(sender)
+			SendPong(sender)
 		end
 	elseif prefix == COMM_PREFIX_PONG then
 		out("PONG", "|cff3399dd"..sender.."|r", "|cffffff00"..message)
@@ -172,7 +172,7 @@ local function WFCSlashCommands(entry)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
 		WFCShamanFrame:SetWarnSize(arg2)
 	elseif arg1 == "ping" then
-		sendPing()
+		SendPing()
 	elseif isMelee and arg1 == "reset" then
 		WFCMeleeFrame:ResetStats()
 	elseif arg1 == "resetpos" then
@@ -229,7 +229,7 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		wfc:ADDON_LOADED(...)
 	end
 	if event == "GROUP_ROSTER_UPDATE" then
-		local joinedParty = broadcastVersionIfNeeded()
+		local joinedParty = BroadcastVersionIfNeeded()
 		if isShaman then
 			WFCShamanFrame:GROUP_ROSTER_UPDATE(joinedParty)
 		elseif isMelee then

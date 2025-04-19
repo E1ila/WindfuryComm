@@ -14,7 +14,7 @@ local classIcon = {
 -- https://wowwiki-archive.fandom.com/wiki/EnchantId/Enchant_IDs
 local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 
-local function getPartySig()
+local function GetPartySig()
     local sig = ""
     for index = 1, 4 do
         local pstring = "party" .. index
@@ -125,7 +125,7 @@ function WFCShamanFrame:CollectGroupInfo()
         local gclass = select(2, UnitClass(pstring))
         self.buttons[index - 1]:Show() -- group joined, show buttons
         if classIcon[gclass] then
-            local name = wfc:getFullName(pstring)
+            local name = wfc:GetFullName(pstring)
             local gGUID, color = UnitGUID(pstring), RAID_CLASS_COLORS[gclass]
             j = j + 1
             self.partyIndex[name] = index
@@ -296,7 +296,7 @@ function WFCShamanFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
         self:ResetGroup()
     else
-        local partySig = getPartySig()
+        local partySig = GetPartySig()
         if partySig ~= self.partySig then
             self:UpdateCurrentTimers()
             self:ResetGroup()
