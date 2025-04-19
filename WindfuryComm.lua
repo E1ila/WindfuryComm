@@ -10,16 +10,15 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
-
 wfc.version, wfc.numericalVersion = "2.1.0", 20100
+wfc.lib = LibStub("LibWFcomm")
+
 local newVersionAlerted = false
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
 local isMelee = pClass == "WARRIOR" or pClass == "ROGUE"
 
-wfc.lib = LibStub("LibWFcomm")
 local CTL = _G.ChatThrottleLib
-
 local COMM_PREFIX_VERSION = "WFC_VERSION"
 local COMM_PREFIX_PING = "WFC_PING"
 local COMM_PREFIX_PONG = "WFC_PONG"
