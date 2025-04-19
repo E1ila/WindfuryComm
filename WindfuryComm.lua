@@ -1,6 +1,4 @@
 wfc = CreateFrame("Frame", "wfc")
-wfc.partyVersion = {}
-wfc.encounter = nil
 
 wfc.eventReg = wfc.eventReg or CreateFrame("Frame")
 wfc.eventReg:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -10,8 +8,10 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
-wfc.version = "2.1.0"
-wfc.numericalVersion = 20100
+wfc.partyVersion = {}
+wfc.encounter = nil
+
+wfc.version, wfc.numericalVersion = "2.1.0", 20100
 local newVersionAlerted = false
 local pClass = select(2, UnitClass("player"))
 local isShaman = pClass == "SHAMAN"
