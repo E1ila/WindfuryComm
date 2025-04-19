@@ -264,7 +264,7 @@ end
 function WFCShamanFrame:OnWfCreditMessage(prefix, message, channel, sender)
     if wfcdb.printCredit then
         local index = self.partyIndex[sender]
-        if index > 0 then
+        if index and index > 0 then
             local combatTime, wfTime, shaman, strTime, agiTime, frTime, frrTime, gndTime = strsplit(":", message)
             combatTime, agiTime, frTime, frrTime, gndTime = tonumber(combatTime), tonumber(agiTime or '0'), tonumber(frTime or '0'), tonumber(frrTime or '0'), tonumber(gndTime or '0')
             local stats = "|cff00bbffWF|r:"..WFCMeleeFrame:UptimeTextSeconds(tonumber(wfTime), combatTime)

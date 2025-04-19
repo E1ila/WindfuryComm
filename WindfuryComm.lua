@@ -43,7 +43,7 @@ function wfc:GetFullName(unit)
 	if realm and realm ~= "" then
 		return name .. "-" .. realm
 	else
-		return name
+		return name .. "-" .. (select(2, UnitFullName("player")) or "")
 	end
 end
 local myFullName = wfc:GetFullName("player")
