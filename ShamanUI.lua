@@ -125,10 +125,10 @@ function WFCShamanFrame:CollectGroupInfo()
         local gclass = select(2, UnitClass(pstring))
         self.buttons[index - 1]:Show() -- group joined, show buttons
         if classIcon[gclass] then
-            local name, realm = UnitName(pstring)
+            local name = wfc:getFullName(pstring)
             local gGUID, color = UnitGUID(pstring), RAID_CLASS_COLORS[gclass]
             j = j + 1
-            self.partyIndex[name.."-"..realm] = index
+            self.partyIndex[name] = index
             self.ixs[gGUID], self.party[gGUID], self.class[gGUID], self.guids[j] = j, pstring, gclass, gGUID
             self.buttons[j].name:SetText(strsub(name, 1, 5))
             self.buttons[j].name:SetTextColor(color.r, color.g, color.b)

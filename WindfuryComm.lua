@@ -38,7 +38,7 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
-local function getFullName(unit)
+function wfc:getFullName(unit)
 	local name, realm = UnitFullName(unit)
 	if realm and realm ~= "" then
 		return name .. "-" .. realm
@@ -46,7 +46,7 @@ local function getFullName(unit)
 		return name
 	end
 end
-local myFullName = getFullName("player")
+local myFullName = wfc:getFullName("player")
 
 local wasInGroup = IsInGroup()
 local function broadcastVersionIfNeeded()
