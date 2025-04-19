@@ -20,7 +20,11 @@ local wfcLib = LibStub("LibWFcomm")
 local CTL = _G.ChatThrottleLib
 
 local COMM_PREFIX_VERSION = "WFC_VERSION"
+local COMM_PREFIX_PING = "WFC_PING"
+local COMM_PREFIX_PONG = "WFC_PONG"
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_VERSION)
+C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_PING)
+C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_PONG)
 
 local function out(text, ...)
 	print(" |cffff8800{|cffffbb00WFC++|cffff8800}|r "..text, ...)
@@ -34,6 +38,16 @@ local function debug(text, ...)
 end
 wfc.debug = debug
 
+local function getFullName(unit)
+	local name, realm = UnitFullName(unit)
+	if realm and realm ~= "" then
+		return name .. "-" .. realm
+	else
+		return name
+	end
+end
+local myFullName = getFullName("player")
+
 local wasInGroup = IsInGroup()
 local function broadcastVersionIfNeeded()
 	local inGroup = IsInGroup()
@@ -43,6 +57,14 @@ local function broadcastVersionIfNeeded()
 	end
 	wasInGroup = inGroup
 	return joinedParty
+end
+
+local function sendPing()
+	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PING, tostring(numericalVersion), 'RAID')
+end
+
+local function sendPong(target)
+	CTL:SendAddonMessage("NORMAL", COMM_PREFIX_PONG, tostring(numericalVersion), 'WHISPER', target)
 end
 
 function wfc:ShowUI(onload)
@@ -101,7 +123,13 @@ function wfc:ADDON_LOADED()
 end
 
 function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
-	if prefix == COMM_PREFIX_VERSION then
+	if prefix == COMM_PREFIX_PING then
+		if (sender ~= myFullName) then
+			sendPong(sender)
+		end
+	elseif prefix == COMM_PREFIX_PONG then
+		out("PONG", "|cff3399dd"..sender.."|r", "|cffffff00"..message)
+	elseif prefix == COMM_PREFIX_VERSION then
 		local otherVersion = tonumber(message)
 		if not newVersionAlerted and otherVersion and otherVersion > numericalVersion then
 			newVersionAlerted = true
@@ -122,6 +150,8 @@ local function WFCSlashCommands(entry)
 		WFCShamanFrame:SetScale(arg2)
 	elseif isShaman and arg1 == "warn" and tonumber(arg2) then
 		WFCShamanFrame:SetWarnSize(arg2)
+	elseif arg1 == "ping" then
+		sendPing()
 	elseif isMelee and arg1 == "reset" then
 		WFCMeleeFrame:ResetStats()
 	elseif arg1 == "resetpos" then

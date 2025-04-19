@@ -141,7 +141,7 @@ function windfuryDurationCheck()
     lastExpiration = expiration
 
     if CTL and msg and (lastStatus ~= mh or hasRefreshed) then
-        CTL:SendAddonMessage("BULK", COMM_PREFIX, msg, 'PARTY')
+        CTL:SendAddonMessage("NORMAL", COMM_PREFIX, msg, 'PARTY')
         lastStatus = mh
     end
 end
