@@ -1,4 +1,5 @@
 ## Interface: 11303
+## Version: v2.1.1
 ## Title: WindfuryComm
 ## Author: Kof, Yotta
 ## SavedVariables: wfcdb
