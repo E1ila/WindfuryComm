@@ -117,7 +117,7 @@ local function CheckCombatWfDrop()
     end
 end
 
-local function WindfuryDurationCheck()
+local function WindfuryDurationCheck(forceBroadcast)
     local msg
     local _, _, lagHome, _ = GetNetStats()
     local mh, expiration, _, enchid, _, _, _, _ = GetWeaponEnchantInfo("player")
@@ -140,7 +140,7 @@ local function WindfuryDurationCheck()
     end
     lastExpiration = expiration
 
-    if CTL and msg and (lastStatus ~= mh or hasRefreshed) then
+    if CTL and msg and (lastStatus ~= mh or hasRefreshed or forceBroadcast) then
         CTL:SendAddonMessage("NORMAL", COMM_PREFIX, msg, 'PARTY')
         lastStatus = mh
     end
@@ -204,8 +204,8 @@ function LibWFcomm:GROUP_ROSTER_UPDATE()
         LibWFcomm.eventReg:RegisterEvent("PLAYER_DEAD")
         LibWFcomm.eventReg:RegisterEvent("PLAYER_ALIVE")
         LibWFcomm.eventReg:RegisterEvent("UNIT_AURA")
-        C_Timer.After(0.15, function()
-            WindfuryDurationCheck()
+        C_Timer.After(0.3, function()
+            WindfuryDurationCheck(true)
         end)
     else
         LibWFcomm.eventReg:UnregisterEvent("UNIT_INVENTORY_CHANGED")

@@ -10,7 +10,7 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
-wfc.version, wfc.numericalVersion = "2.1.1", 20101
+wfc.version, wfc.numericalVersion = "2.1.2", 20102
 wfc.lib = LibStub("LibWFcomm")
 
 local newVersionAlerted = false
@@ -100,6 +100,7 @@ function wfc:InitSavedVariables()
 	}
 	if not wfcdb.version then wfcdb.version = wfc.numericalVersion end
 	if not wfcdbc.version then wfcdbc.version = wfc.numericalVersion end
+	if not wfcdbc.ignore then wfcdbc.ignore = {} end
 end
 
 function wfc:InitUI()
@@ -190,6 +191,20 @@ local function WFCSlashCommands(entry)
 		else
 			wfcdb.debug = not wfcdb.debug
 			out("Debug print is now " .. (wfcdb.debug and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
+		end
+	elseif arg1 == "ignore" then
+		-- insert target unit into wfcdb.ignore list
+		local target = UnitFullName("target")
+		if target then
+			if not wfcdbc.ignore[target] then
+				wfcdbc.ignore[target] = true
+				out("Ignoring "..target)
+			else
+				wfcdbc.ignore[target] = nil
+				out("No longer ignoring "..target)
+			end
+		else
+			out("No target")
 		end
 	elseif arg1 == "ver" then
 		out("Your version: "..wfc.version)
