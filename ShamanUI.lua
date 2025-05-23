@@ -98,7 +98,7 @@ function WFCShamanFrame:SetScale(x)
 end
 
 function WFCShamanFrame:SetWarnSize(x)
-    wfcdb.warnsize = tonumber(arg2)
+    wfcdb.warnsize = tonumber(x)
     self:ModLayout()
 end
 

@@ -10,7 +10,7 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
-wfc.version, wfc.numericalVersion = "2.1.2", 20102
+wfc.version, wfc.numericalVersion = "2.1.3", 20103
 wfc.lib = LibStub("LibWFcomm")
 
 local newVersionAlerted = false
@@ -235,7 +235,7 @@ local function WFCSlashCommands(entry)
 			out("|cFF00FFaa/wfc size <integer>|r set size of icons (|cff00bbff" .. wfcdb.size .. "|r)")
 			out("|cFF00FFaa/wfc spacing <integer>|r set spacing between icons (|cff00bbff" .. wfcdb.space .. "|r)")
 			out("|cFF00FFaa/wfc print|r toggle printing of party totem uptime (" .. tostring(wfcdb.printCredit and "|cff00ff00enabled|r" or "|cffff0000disabled|r") .. ")")
-			out("|cFF00FFaa/wfc warn <integer>|r size of warning border (|cff00bbff" .. wfcdb.warnsize .. "|r)")
+			out("|cFF00FFaa/wfc warn <integer>|r size of warning border (|cff00bbff" .. tostring(wfcdb.warnsize or 0) .. "|r)")
 		end
 	end
 end
