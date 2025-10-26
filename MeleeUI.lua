@@ -221,9 +221,12 @@ end
 
 function WFCMeleeFrame:FixAnchor()
     -- anchor to top, required because the "movable" feature changes anchor
-    if self:GetLeft() then
+    local left = self:GetLeft()
+    local top = self:GetTop()
+    local uiTop = UIParent:GetTop()
+    if left and top and uiTop then
         self:ClearAllPoints()
-        self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetLeft(), self:GetTop() - UIParent:GetTop())
+        self:SetPoint("TOPLEFT", UIParent, "TOPLEFT", left, top - uiTop)
     end
 end
 
