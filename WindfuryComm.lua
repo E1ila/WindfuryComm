@@ -10,7 +10,7 @@ wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
-wfc.version, wfc.numericalVersion = "2.1.3", 20103
+wfc.version, wfc.numericalVersion = "2.1.4", 20104
 wfc.lib = LibStub("LibWFcomm")
 
 local newVersionAlerted = false
