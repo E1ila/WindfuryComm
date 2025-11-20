@@ -123,6 +123,16 @@ function wfc:ADDON_LOADED()
 	self:InitSavedVariables()
 	self:InitUI()
 	out("WindfuryComm++ v"..wfc.version.." loaded")
+	if isShaman and not wfcdb.autoRespondWFDropped then
+		if wfcdb.autoRespondWFInfo then
+			out("|cffffbbff Tired of these silly WINDFURY MISSING!!!!! spam? SPAM'EM BACK! Write '/wfc nowf' to auto-whisper the spammer that you're aware of that.")
+		else
+			wfcdb.autoRespondWFInfo = true
+			C_Timer.After(3, function()
+				out("|cffffbbff Tired of these silly WINDFURY MISSING!!!!! spam? SPAM'EM BACK! Write '/wfc nowf' to auto-whisper the spammer that you're aware of that.")
+			end)
+		end
+	end
 end
 
 function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
