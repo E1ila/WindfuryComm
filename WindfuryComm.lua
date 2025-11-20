@@ -7,6 +7,7 @@ wfc.eventReg:RegisterEvent("CHAT_MSG_ADDON")
 wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
+wfc.eventReg:RegisterEvent("CHAT_MSG_PARTY")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
@@ -101,6 +102,7 @@ function wfc:InitSavedVariables()
 	if not wfcdb.version then wfcdb.version = wfc.numericalVersion end
 	if not wfcdbc.version then wfcdbc.version = wfc.numericalVersion end
 	if not wfcdbc.ignore then wfcdbc.ignore = {} end
+	if wfcdb.autoRespondWFDropped == nil then wfcdb.autoRespondWFDropped = false end
 end
 
 function wfc:InitUI()
@@ -161,6 +163,19 @@ function wfc:ENCOUNTER_END(encounterId)
 	end
 end
 
+local wfDroppedResponseCooldown = {}
+function wfc:CHAT_MSG_PARTY(message, sender)
+	if not isShaman or not wfcdb.autoRespondWFDropped then return end
+	local messageLower = string.lower(message)
+	if  string.find(messageLower, "wf dropped") or string.find(messageLower, "wf missing") or string.find(messageLower, "windfury dropped") or string.find(messageLower, "windfury missing") or string.find(messageLower, "no wf!") or string.find(messageLower, "no windfury") then
+		local now = GetTime()
+		if not wfDroppedResponseCooldown[sender] or now - wfDroppedResponseCooldown[sender] >= 1 then
+			wfDroppedResponseCooldown[sender] = now
+			SendChatMessage("I am aware of that, please disable this WA as I'm using WindfuryComm++ and see a big visible red square when you don't have WF.", "WHISPER", nil, sender)
+		end
+	end
+end
+
 local function WFCSlashCommands(entry)
 	local arg1, arg2 = strsplit(" ", entry)
 	if isShaman and arg1 == "orientation" and (arg2 == "horizontal" or arg2 == "vertical") then
@@ -215,6 +230,9 @@ local function WFCSlashCommands(entry)
 				out("  "..name .. ": " .. v)
 			end
 		end
+	elseif arg1 == "nowf" then
+		wfcdb.autoRespondWFDropped = not wfcdb.autoRespondWFDropped
+		out("Auto-respond to WF dropped messages is now " .. (wfcdb.autoRespondWFDropped and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
 	elseif arg1 == "show" then
 		wfc:ShowUI()
 	elseif arg1 == "lock" then
@@ -230,6 +248,7 @@ local function WFCSlashCommands(entry)
 		end
 		out("|cFF00FFaa/wfc resetpos|r reset window position")
 		out("|cFF00FFaa/wfc lock|r toggle lock/unlock window position ("..(wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r")..")")
+		out("|cFF00FFaa/wfc nowf|r toggle auto-respond to WF dropped messages ("..(wfcdb.autoRespondWFDropped and "|cff00ff00enabled|r" or "|cffff0000disabled|r")..")")
 		if isShaman then
 			out("|cFF00FFaa/wfc orientation <horizontal/vertical>|r layout of icons ("..(wfcdb.orientation == "horizontal" and "|cff00ff00horizontal|r" or "|cffff0000vertical|r")..")")
 			out("|cFF00FFaa/wfc size <integer>|r set size of icons (|cff00bbff" .. wfcdb.size .. "|r)")
@@ -257,6 +276,8 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		end
 	elseif event == "CHAT_MSG_ADDON" then
 		wfc:CHAT_MSG_ADDON(...)
+	elseif event == "CHAT_MSG_PARTY" then
+		wfc:CHAT_MSG_PARTY(...)
 	elseif event == "ENCOUNTER_START" then
 		wfc:ENCOUNTER_START(...)
 	elseif event == "ENCOUNTER_END" then
