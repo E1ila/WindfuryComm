@@ -173,11 +173,30 @@ function wfc:ENCOUNTER_END(encounterId)
 	end
 end
 
+local wfMissingPatterns = {
+	"wf dropped",
+	"wf missing",
+	"windfury dropped",
+	"windfury missing",
+	"windfury is missing",
+	"no wf!",
+	"no windfury"
+}
+
 local wfDroppedResponseCooldown = {}
 function wfc:CHAT_MSG_PARTY(message, sender)
-	if not isShaman or not wfcdb.autoRespondWFDropped then return end
+	if not isShaman or not wfcdb.autoRespondWFDropped or sender == myFullName then return end
 	local messageLower = string.lower(message)
-	if  string.find(messageLower, "wf dropped") or string.find(messageLower, "wf missing") or string.find(messageLower, "windfury dropped") or string.find(messageLower, "windfury missing") or string.find(messageLower, "no wf!") or string.find(messageLower, "no windfury") then
+
+	local isWFMissingMessage = false
+	for _, pattern in ipairs(wfMissingPatterns) do
+		if string.find(messageLower, pattern, 1, true) then
+			isWFMissingMessage = true
+			break
+		end
+	end
+
+	if isWFMissingMessage then
 		local now = GetTime()
 		if not wfDroppedResponseCooldown[sender] or now - wfDroppedResponseCooldown[sender] >= 1 then
 			wfDroppedResponseCooldown[sender] = now
