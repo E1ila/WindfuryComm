@@ -8,6 +8,7 @@ wfc.eventReg:RegisterEvent("ADDON_LOADED")
 wfc.eventReg:RegisterEvent("ENCOUNTER_START")
 wfc.eventReg:RegisterEvent("ENCOUNTER_END")
 wfc.eventReg:RegisterEvent("CHAT_MSG_PARTY")
+wfc.eventReg:RegisterEvent("CHAT_MSG_PARTY_LEADER")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
@@ -305,7 +306,8 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 		end
 	elseif event == "CHAT_MSG_ADDON" then
 		wfc:CHAT_MSG_ADDON(...)
-	elseif event == "CHAT_MSG_PARTY" then
+	elseif event == "CHAT_MSG_PARTY" or event == "CHAT_MSG_PARTY_LEADER" then
+		out("Event triggered:", event)
 		wfc:CHAT_MSG_PARTY(...)
 	elseif event == "ENCOUNTER_START" then
 		wfc:ENCOUNTER_START(...)
