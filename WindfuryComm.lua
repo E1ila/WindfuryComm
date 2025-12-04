@@ -307,7 +307,6 @@ wfc.eventReg:SetScript("OnEvent", function(self, event, ...)
 	elseif event == "CHAT_MSG_ADDON" then
 		wfc:CHAT_MSG_ADDON(...)
 	elseif event == "CHAT_MSG_PARTY" or event == "CHAT_MSG_PARTY_LEADER" then
-		out("Event triggered:", event)
 		wfc:CHAT_MSG_PARTY(...)
 	elseif event == "ENCOUNTER_START" then
 		wfc:ENCOUNTER_START(...)
