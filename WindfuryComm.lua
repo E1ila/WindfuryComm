@@ -134,6 +134,13 @@ function wfc:ADDON_LOADED()
 			end)
 		end
 	end
+	C_Timer.After(5, function()
+		local isLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+		if not wfcdbc.quickAurasRecommended and not isLoaded("QuickAuras") then
+			out("|cffffbb00Recommended:|r |cff00ccffQuickAuras|r by |cffb266ffKof|r @ |cffff2222Firemaw|r (era) - lightweight replacement for common WeakAuras (swing timers, cooldowns, missing buffs, reminders, raid bars and more) at a fraction of the CPU/FPS cost")
+			wfcdbc.quickAurasRecommended = true
+		end
+	end)
 end
 
 function wfc:CHAT_MSG_ADDON(prefix, message, channel, sender)
