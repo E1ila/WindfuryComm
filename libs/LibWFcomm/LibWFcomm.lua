@@ -32,6 +32,7 @@ local TRACKED_AURA_NAMES = {
 }
 local TRACKED_AURAS_LIST = { "WF", "STR", "AGI", "FR", "FrR", "GND" }
 local PERIODIC_UPDATE_SECONDS = 1
+local REFRESH_TOLERANCE_SECONDS = 0.5
 
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_CREDIT)
@@ -39,7 +40,7 @@ C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_CREDIT)
 local pGUID = UnitGUID("player")
 local pClass = select(2, UnitClass("player"))
 
-local lastExpiration
+local lastExpiresAt
 local lastEnchant
 local lastStatus
 local rosterRetryPending = false
@@ -129,17 +130,20 @@ local function WindfuryDurationCheck(forceBroadcast)
     CheckCombatStartOrEnd(combat == "1");
 
     local refreshed = false
+    local expiresAt
     if mh then
         -- report wf expiration time
         msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor)
         CheckCombatWfStart(enchid)
-        refreshed = enchid ~= lastEnchant or lastExpiration == nil or expiration > lastExpiration
+        -- Compare end times, not time remaining: every check runs just after a refresh, so remaining reads about the same each time.
+        expiresAt = GetTime() + expiration / 1000
+        refreshed = enchid ~= lastEnchant or not lastExpiresAt or expiresAt > lastExpiresAt + REFRESH_TOLERANCE_SECONDS
     else
         -- report expired wf
         msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor)
         CheckCombatWfDrop()
     end
-    lastExpiration = expiration
+    lastExpiresAt = expiresAt
     lastEnchant = enchid
 
     if CTL and msg and (lastStatus ~= mh or refreshed or forceBroadcast) then
