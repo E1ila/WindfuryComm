@@ -74,7 +74,11 @@ function wfc:ShowUI(onload)
 	if isShaman then
 		WFCShamanFrame:ShowUI()
 	elseif isMelee and not onload then
-		WFCMeleeFrame:ShowUI()
+		if WFCMeleeFrame:IsShown() then
+			WFCMeleeFrame:ResetPos()
+		else
+			WFCMeleeFrame:ShowUI()
+		end
 	end
 end
 
@@ -282,6 +286,7 @@ local function WFCSlashCommands(entry)
 		out("|cFF00FFaa/wfc <hide/show>|r show or hide UI ("..(wfcdbc.shown and "|cff00ff00shown|r" or "|cffff0000hidden|r")..")")
 		if isMelee then
 			out("|cFF00FFaa/wfc reset|r reset stats")
+			out("|cFF00FFaa/wfc show|r when already shown, resets window position")
 		end
 		out("|cFF00FFaa/wfc resetpos|r reset window position")
 		out("|cFF00FFaa/wfc lock|r toggle lock/unlock window position ("..(wfcdbc.locked and "|cffff0000locked|r" or "|cff00ff00unlocked|r")..")")
