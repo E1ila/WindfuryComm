@@ -1,10 +1,10 @@
 ## Interface: 11303
-## Version: v2.1.6
+## Version: v2.1.7
 ## Title: WindfuryComm
 ## Author: Kof, Yotta
 ## SavedVariables: wfcdb
 ## SavedVariablesPerCharacter: wfcdbc
-## v2.1.6
+## v2.1.7
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua

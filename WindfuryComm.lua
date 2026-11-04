@@ -12,7 +12,7 @@ wfc.eventReg:RegisterEvent("CHAT_MSG_PARTY_LEADER")
 
 wfc.partyVersion = {}
 wfc.encounter = nil
-wfc.version, wfc.numericalVersion = "2.1.6", 20106
+wfc.version, wfc.numericalVersion = "2.1.7", 20107
 wfc.lib = LibStub("LibWFcomm")
 
 local newVersionAlerted = false

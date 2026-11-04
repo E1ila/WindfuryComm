@@ -15,15 +15,17 @@ local classIcon = {
 local spellTable = { [564] = 'WF3', [563] = 'WF2', [1783] = 'WF1' }
 
 local function GetPartySig()
-    local sig = ""
+    local sig, unresolved = "", false
     for index = 1, 4 do
         local pstring = "party" .. index
         local guid = UnitGUID(pstring)
         if guid then
-            sig = sig..UnitGUID(pstring)
+            local gclass = select(2, UnitClass(pstring))
+            sig = sig..guid..(gclass or "?")
+            unresolved = unresolved or not gclass
         end
     end
-    return sig
+    return sig, unresolved
 end
 
 function WFCShamanFrame:Init() -- initialize the frames on screen
@@ -206,7 +208,8 @@ function WFCShamanFrame:UpdateCurrentTimers()
     for j = 0, 3 do
         if self.guids[j] then
             gGUID = self.guids[j]
-            self.currentTimers[gGUID] = self.buttons[j].cd:GetCooldownDuration() / 1000
+            local start, duration = self.buttons[j].cd:GetCooldownTimes()
+            self.currentTimers[gGUID] = (start + duration) / 1000 - GetTime()
         end
     end
 end
@@ -240,6 +243,9 @@ function WFCShamanFrame:OnWfRefreshMessage(prefix, message, channel, sender)
     local gGUID, spellID, expiration, lag, combat, isdead, version = strsplit(":", message)
     local playerIndex = self.ixs[gGUID]
     if not playerIndex then
+        if wfcdb.debugStatus then
+            wfc.debug('|cffff5555'..prefix..' ignored, sender has no button:|r', sender, gGUID)
+        end
         return
     end
     spellID, expiration, lagHome = tonumber(spellID), tonumber(expiration), tonumber(lagHome)
@@ -295,14 +301,23 @@ end
 function WFCShamanFrame:GROUP_ROSTER_UPDATE()
     if GetNumGroupMembers() == 0 then
         self:ResetGroup()
+        self.partySig = nil
     else
-        local partySig = GetPartySig()
+        local partySig, unresolved = GetPartySig()
         if partySig ~= self.partySig then
             self:UpdateCurrentTimers()
             self:ResetGroup()
             self:CollectGroupInfo()
             self:RestartCurrentTimers()
             self.partySig = partySig
+        end
+        -- No roster event fires when a member's class becomes known, so poll until it does.
+        if unresolved and not self.rosterRetryPending then
+            self.rosterRetryPending = true
+            C_Timer.After(1, function()
+                self.rosterRetryPending = false
+                self:GROUP_ROSTER_UPDATE()
+            end)
         end
     end
 end

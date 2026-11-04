@@ -1,6 +1,6 @@
 assert(LibStub, "WindfuryComm requires LibStub")
 
-local major, minor = "LibWFcomm", 4
+local major, minor = "LibWFcomm", 5
 local LibWFcomm = LibStub:NewLibrary(major, minor)
 local CTL = _G.ChatThrottleLib
 local COMM_PREFIX = "WF_STATUS"
@@ -36,11 +36,13 @@ local PERIODIC_UPDATE_SECONDS = 1
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX)
 C_ChatInfo.RegisterAddonMessagePrefix(COMM_PREFIX_CREDIT)
 
-pGUID = UnitGUID("player")
-pClass = select(2, UnitClass("player"))
+local pGUID = UnitGUID("player")
+local pClass = select(2, UnitClass("player"))
 
 local lastExpiration
-local hasRefreshed = false
+local lastEnchant
+local lastStatus
+local rosterRetryPending = false
 local myShaman
 local cs = {
     ["start"] = {
@@ -126,21 +128,21 @@ local function WindfuryDurationCheck(forceBroadcast)
 
     CheckCombatStartOrEnd(combat == "1");
 
+    local refreshed = false
     if mh then
         -- report wf expiration time
         msg = format("%s:%d:%d:%d:%s:%s:%d", pGUID, enchid, expiration, lagHome, combat, isdead, minor)
         CheckCombatWfStart(enchid)
-        if lastExpiration == nil or expiration > lastExpiration then
-            hasRefreshed = true
-        end
+        refreshed = enchid ~= lastEnchant or lastExpiration == nil or expiration > lastExpiration
     else
         -- report expired wf
         msg = format("%s:nil:nil:%s:%s:%s:%d", pGUID, lagHome, combat, isdead, minor)
         CheckCombatWfDrop()
     end
     lastExpiration = expiration
+    lastEnchant = enchid
 
-    if CTL and msg and (lastStatus ~= mh or hasRefreshed or forceBroadcast) then
+    if CTL and msg and (lastStatus ~= mh or refreshed or forceBroadcast) then
         CTL:SendAddonMessage("NORMAL", COMM_PREFIX, msg, 'PARTY')
         lastStatus = mh
     end
@@ -172,16 +174,20 @@ local function AuraPresenceCheck()
     end
 end
 
-local function CheckForShaman()
-    myShaman = nil
+local function FindShaman()
+    local shaman, unresolved
     for index = 1, 4 do
         local pstring = "party" .. index
-        local gclass = select(2, UnitClass(pstring))
-        if (gclass == "SHAMAN") then
-            myShaman = UnitName(pstring)
+        if UnitExists(pstring) then
+            local gclass = select(2, UnitClass(pstring))
+            if gclass == "SHAMAN" then
+                shaman = UnitName(pstring)
+            elseif not gclass then
+                unresolved = true
+            end
         end
     end
-    return myShaman
+    return shaman, unresolved
 end
 
 function LibWFcomm:PLAYER_LOGIN()
@@ -197,7 +203,24 @@ function LibWFcomm:PARTY_MEMBER_ENABLE(unitId)
 end
 
 function LibWFcomm:GROUP_ROSTER_UPDATE()
-    if (GetNumGroupMembers() ~= 0 and CheckForShaman()) then
+    local shaman, unresolved
+    if GetNumGroupMembers() ~= 0 then
+        shaman, unresolved = FindShaman()
+    end
+    if unresolved and not shaman then
+        -- A party member's class can be unknown right after joining or a loading screen.
+        -- Treating that as "no shaman" would silence WF reports until the next roster event.
+        if not rosterRetryPending then
+            rosterRetryPending = true
+            C_Timer.After(1, function()
+                rosterRetryPending = false
+                LibWFcomm:GROUP_ROSTER_UPDATE()
+            end)
+        end
+        return
+    end
+    myShaman = shaman
+    if shaman then
         LibWFcomm.eventReg:RegisterUnitEvent("UNIT_INVENTORY_CHANGED", "player")
         LibWFcomm.eventReg:RegisterEvent("PLAYER_REGEN_DISABLED")
         LibWFcomm.eventReg:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -231,26 +254,26 @@ end
 
 function LibWFcomm:PLAYER_REGEN_DISABLED()
     C_Timer.After(0.15, function()
-        WindfuryDurationCheck()
+        WindfuryDurationCheck(true)
         AuraPresenceCheck()
     end)
 end
 
 function LibWFcomm:PLAYER_REGEN_ENABLED()
     C_Timer.After(0.15, function()
-        WindfuryDurationCheck()
+        WindfuryDurationCheck(true)
     end)
 end
 
 function LibWFcomm:PLAYER_DEAD()
     C_Timer.After(0.15, function()
-        WindfuryDurationCheck()
+        WindfuryDurationCheck(true)
     end)
 end
 
 function LibWFcomm:PLAYER_ALIVE()
     C_Timer.After(0.15, function()
-        WindfuryDurationCheck()
+        WindfuryDurationCheck(true)
     end)
 end
 
